@@ -25,7 +25,7 @@ Abra o **Claude Desktop** na aba **Code** (ou o Claude Code no terminal), cole o
 
 ```text
 Instale o WhatsApp + Claude seguindo o guia
-https://raw.githubusercontent.com/thaleslaray/whatsapp-claude/v0.16.1/INSTALL.md
+https://raw.githubusercontent.com/thaleslaray/whatsapp-claude/main/INSTALL.md
 Leia o guia inteiro antes de rodar qualquer comando, me diga o que vai fazer
 e pare para eu decidir antes de parear o WhatsApp.
 ```

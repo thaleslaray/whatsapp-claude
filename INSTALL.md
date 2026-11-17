@@ -83,17 +83,17 @@ mkdir -p ~/.claude/backups-de-skills
 mv ~/.claude/skills/rotinas-whatsapp ~/.claude/backups-de-skills/rotinas-whatsapp-$(date +%Y%m%d-%H%M%S)
 ```
 
-Depois, rode este bloco inteiro numa chamada só. Ele baixa a versão, copia a skill e apaga a pasta temporária:
+Depois, rode este bloco inteiro numa chamada só. Ele baixa o pacote da skill da release, copia a skill e apaga a pasta temporária:
 
 ```bash
 (
   set -e
   TMP="$(mktemp -d)"
   trap 'rm -rf "$TMP"' EXIT
-  curl -fsSL https://github.com/thaleslaray/whatsapp-claude/archive/refs/tags/v0.16.1.tar.gz -o "$TMP/fonte.tar.gz"
-  tar -xzf "$TMP/fonte.tar.gz" -C "$TMP"
+  curl -fsSL https://github.com/thaleslaray/whatsapp-claude/releases/download/v0.16.1/rotinas-whatsapp.skill -o "$TMP/rotinas-whatsapp.skill"
+  unzip -q "$TMP/rotinas-whatsapp.skill" -d "$TMP"
   mkdir -p ~/.claude/skills
-  cp -R "$TMP/whatsapp-claude-0.16.1/skill/rotinas-whatsapp" ~/.claude/skills/rotinas-whatsapp
+  cp -R "$TMP/rotinas-whatsapp" ~/.claude/skills/rotinas-whatsapp
   head -3 ~/.claude/skills/rotinas-whatsapp/SKILL.md
 )
 ```
