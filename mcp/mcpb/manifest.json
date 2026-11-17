@@ -1,0 +1,209 @@
+{
+  "manifest_version": "0.4",
+  "name": "whatsapp-pessoal",
+  "display_name": "WhatsApp pessoal",
+  "icon": "icon.png",
+  "version": "0.16.1",
+  "description": "Cliente não oficial, para uso pessoal: o Claude lê as suas conversas e os grupos que você escolher no WhatsApp, e só escreve depois do seu clique.",
+  "long_description": "Projeto pessoal, sem relação com o WhatsApp ou a Meta. Conecta como aparelho vinculado (biblioteca Baileys), o que viola os termos do WhatsApp e pode levar a restrição ou banimento do número; começar conversa com quem não tem o seu número é o que mais leva a banimento. Depois de instalar, peça ao Claude \"parear o WhatsApp\" e leia o QR que aparece na conversa. Lê as conversas individuais (menos as da lista \"nunca ler\") e só os grupos que você escolher; pede ao celular mensagens mais antigas quando você quiser. Abre fotos, áudios, vídeos e documentos recebidos quando você pedir: eles ficam em Downloads/WhatsApp Claude, sem cifra. Transcreve áudios neste computador quando você pedir (o modelo de transcrição, 190 MB, é baixado uma vez, depois do seu clique). Responde conversas e grupos escolhidos, envia arquivos deste computador, começa conversa com um número novo, edita (até 15 min) e apaga para todos (até 48 h) as suas mensagens: tudo isso só depois do seu clique no cartão, com o envio ligado e até o limite do dia. Reagir com emoji é direto, com teto diário. Nunca marca como lida, nunca aparece online e não manda prévia de link. A conexão só fica ligada com o Claude Desktop aberto; tudo é guardado cifrado neste computador, com a chave no cofre do sistema. Funciona no Mac e no Windows.",
+  "author": {
+    "name": "Thales Laray",
+    "url": "https://thaleslaray.com.br"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.mjs"
+      ],
+      "env": {
+        "WA_LIMITE_DIARIO": "${user_config.WA_LIMITE_DIARIO}",
+        "WA_LIMITE_NOVAS_CONVERSAS": "${user_config.WA_LIMITE_NOVAS_CONVERSAS}",
+        "WA_IDIOMA_TRANSCRICAO": "${user_config.WA_IDIOMA_TRANSCRICAO}",
+        "WA_PEDIDOS_DE_HISTORICO_POR_DIA": "${user_config.WA_PEDIDOS_DE_HISTORICO_POR_DIA}",
+        "WA_INSTALACAO": "extensao"
+      }
+    }
+  },
+  "user_config": {
+    "WA_LIMITE_DIARIO": {
+      "type": "number",
+      "title": "Limite de respostas por dia",
+      "description": "Quantas mensagens o Claude pode enviar por dia, depois do seu clique (respostas e conversas novas somadas). De 1 a 200; o padrão é 30.",
+      "default": 30,
+      "min": 1,
+      "max": 200,
+      "required": false
+    },
+    "WA_LIMITE_NOVAS_CONVERSAS": {
+      "type": "number",
+      "title": "Conversas novas por dia",
+      "description": "Quantas conversas novas (com números que nunca falaram com você) o Claude pode começar por dia, depois do seu clique. De 0 a 20; o padrão é 5; 0 desliga. Começar conversa com desconhecidos é o que mais leva a banimento.",
+      "default": 5,
+      "min": 0,
+      "max": 20,
+      "required": false
+    },
+    "WA_IDIOMA_TRANSCRICAO": {
+      "type": "string",
+      "title": "Idioma da transcricao",
+      "description": "Em que idioma os áudios são transcritos (neste computador): pt, en, es ou auto (o motor descobre sozinho). O padrão é pt.",
+      "default": "pt",
+      "required": false
+    },
+    "WA_PEDIDOS_DE_HISTORICO_POR_DIA": {
+      "type": "number",
+      "title": "Pedidos de historico por dia",
+      "description": "Quantas vezes por dia o Claude pode pedir ao celular mensagens mais antigas de uma conversa (até 50 por pedido). De 1 a 500; o padrão é 30. Suba só de propósito, para encher um grupo de histórico: pedidos demais em pouco tempo podem chamar a atenção do WhatsApp.",
+      "default": 30,
+      "min": 1,
+      "max": 500,
+      "required": false
+    }
+  },
+  "tools": [
+    {
+      "name": "wa_estado",
+      "description": "Conexão, número, conversas guardadas e limite do dia"
+    },
+    {
+      "name": "wa_listar_conversas",
+      "description": "Lista as conversas e os grupos escolhidos"
+    },
+    {
+      "name": "wa_ler_conversa",
+      "description": "Lê as mensagens guardadas de uma conversa"
+    },
+    {
+      "name": "wa_buscar",
+      "description": "Busca texto nas mensagens guardadas"
+    },
+    {
+      "name": "wa_listar_grupos",
+      "description": "Lista os seus grupos (só nome e tamanho)"
+    },
+    {
+      "name": "wa_abrir_midia",
+      "description": "Abre foto, áudio, vídeo ou documento recebido (fica em Downloads, sem cifra)"
+    },
+    {
+      "name": "wa_transcrever",
+      "description": "Transcreve neste computador um áudio ou mensagem de voz recebido (na primeira vez, cartão para baixar o modelo, 190 MB)"
+    },
+    {
+      "name": "wa_buscar_historico",
+      "description": "Pede ao celular mensagens mais antigas de uma conversa"
+    },
+    {
+      "name": "wa_escolher_grupos",
+      "description": "Escolhe quais grupos o Claude lê"
+    },
+    {
+      "name": "wa_bloquear_conversas",
+      "description": "Põe ou tira conversas da lista \"nunca ler\""
+    },
+    {
+      "name": "wa_marcar_resumo",
+      "description": "Guarda até onde um grupo já foi resumido"
+    },
+    {
+      "name": "wa_anotar",
+      "description": "Guarda na memória local um resumo e compromissos de uma conversa (citação conferida)"
+    },
+    {
+      "name": "wa_memoria",
+      "description": "Lê a memória: resumos e compromissos em aberto, com prazo"
+    },
+    {
+      "name": "wa_esquecer",
+      "description": "Apaga a memória de uma conversa ou toda"
+    },
+    {
+      "name": "wa_meu_jeito",
+      "description": "Mostra o jeito do dono escrever, medido nas mensagens dele (tamanho, rajadas, caixa, emoji), as regras e propostas"
+    },
+    {
+      "name": "wa_exemplos_do_meu_jeito",
+      "description": "Exemplos reais de mensagens do dono (forma, não fato) para redigir uma resposta numa conversa"
+    },
+    {
+      "name": "wa_conferir_rascunho",
+      "description": "Confere um rascunho contra o jeito medido do dono e as regras ativas, antes do cartão (não guarda o texto)"
+    },
+    {
+      "name": "wa_como_eu_respondi",
+      "description": "O que o dono já respondeu a dúvidas parecidas (pergunta e resposta, com data), nos grupos e nas conversas"
+    },
+    {
+      "name": "wa_edicoes_dos_rascunhos",
+      "description": "O que o dono mudou nos rascunhos dos cartões antes de enviar, com estatísticas"
+    },
+    {
+      "name": "wa_aprender",
+      "description": "Propõe, decide (com o sim do dono) e apaga regras de forma, dá o tipo das conversas, liga e desliga o aprendizado"
+    },
+    {
+      "name": "wa_atualizar_contatos",
+      "description": "Pede de novo ao celular a agenda de contatos do WhatsApp quando faltar nome (ela já se atualiza sozinha depois do pareamento e toda semana)"
+    },
+    {
+      "name": "wa_parear",
+      "description": "Pareia o WhatsApp pelo QR (com aviso de risco)"
+    },
+    {
+      "name": "wa_qr",
+      "description": "Mostra no cartão o QR atual de um pareamento já autorizado"
+    },
+    {
+      "name": "wa_envio",
+      "description": "Liga ou desliga o envio (com clique)"
+    },
+    {
+      "name": "wa_responder",
+      "description": "Responde uma conversa ou grupo escolhido (com clique no cartão)"
+    },
+    {
+      "name": "wa_enviar_arquivo",
+      "description": "Envia um arquivo deste computador (com clique no cartão)"
+    },
+    {
+      "name": "wa_iniciar_conversa",
+      "description": "Começa conversa com um número novo (com clique no cartão)"
+    },
+    {
+      "name": "wa_reagir",
+      "description": "Reage a uma mensagem com um emoji (direto, desfaz com vazio)"
+    },
+    {
+      "name": "wa_editar",
+      "description": "Edita uma mensagem de texto sua, até 15 min (com clique)"
+    },
+    {
+      "name": "wa_apagar",
+      "description": "Apaga para todos uma mensagem sua, até 48 h (com clique)"
+    },
+    {
+      "name": "wa_desconectar",
+      "description": "Desconecta e apaga tudo deste computador (com clique)"
+    },
+    {
+      "name": "wa_confirmar",
+      "description": "Confirma um pedido com o código recebido do cartão"
+    },
+    {
+      "name": "wa_cancelar",
+      "description": "Cancela um pedido pendente"
+    }
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32"
+    ],
+    "runtimes": {
+      "node": ">=22.0.0"
+    }
+  }
+}

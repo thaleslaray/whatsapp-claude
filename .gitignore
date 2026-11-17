@@ -1,0 +1,7 @@
+node_modules/
+mcp/mcpb/server/
+mcp/nativo/
+mcp/src/ui-gerada.ts
+*.mcpb
+notas/
+.DS_Store

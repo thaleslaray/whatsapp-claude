@@ -1,0 +1,43 @@
+{
+  "name": "whatsapp-claude",
+  "version": "0.16.1",
+  "private": true,
+  "description": "Servidor MCP local e pessoal para o Claude ler o WhatsApp do dono (aparelho vinculado, não oficial): conversas individuais e grupos escolhidos",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "gerar-ui": "node scripts/gerar-ui.mjs",
+    "pretypecheck": "npm run gerar-ui",
+    "typecheck": "tsc -p tsconfig.json",
+    "pretest": "npm run gerar-ui",
+    "test": "node --import ./test/setup.ts --test \"test/**/*.test.ts\"",
+    "prebuild": "npm run gerar-ui && node scripts/nativos.mjs",
+    "build": "esbuild src/stdio.ts --bundle --platform=node --format=esm --target=node22 --external:sharp --external:jimp --external:audio-decode --external:link-preview-js --external:music-metadata --minify --keep-names --legal-comments=none --banner:js=\"import{createRequire as __criarRequire}from'node:module';const require=__criarRequire(import.meta.url);\" --outfile=mcpb/server/index.mjs",
+    "gerar-icone": "node scripts/gerar-icone.mjs",
+    "validate": "npx -y @anthropic-ai/mcpb@2.1.2 validate mcpb/manifest.json",
+    "pack": "npm run build && npm run validate && npx -y @anthropic-ai/mcpb@2.1.2 pack mcpb whatsapp-pessoal.mcpb",
+    "autoteste": "node scripts/autoteste.mjs",
+    "check": "npm run typecheck && npm test && npm run pack && npm run autoteste"
+  },
+  "dependencies": {
+    "@jimp/core": "1.6.1",
+    "@jimp/js-jpeg": "1.6.1",
+    "@jimp/js-png": "1.6.1",
+    "@jimp/plugin-resize": "1.6.1",
+    "@modelcontextprotocol/ext-apps": "2.0.4",
+    "@modelcontextprotocol/server": "2.4.0",
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "ogg-opus-decoder": "1.7.5",
+    "qrcode": "1.5.4",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.4.0",
+    "@types/node": "26.6.6",
+    "@types/qrcode": "1.5.6",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}
