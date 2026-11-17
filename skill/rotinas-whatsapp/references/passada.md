@@ -2,7 +2,7 @@
 
 ## Para que serve
 
-A Pendências faz um relatório. A Passada é para limpar: em uns 10 minutos o dono escolhe o destino de cada conversa, numa múltipla escolha com respostas já escritas, e ela não volta a aparecer até a pessoa escrever de novo. Pensada para rodar 2 vezes por dia, em horário fixo, em vez de olhar o WhatsApp o dia todo.
+A Pendências faz um relatório. A Passada é para limpar, e é o que roda quando o dono diz "olha meu WhatsApp" ou chama a skill sem pedido: em uns 10 minutos o dono escolhe o destino de cada conversa, numa múltipla escolha com respostas já escritas, e ela não volta a aparecer até a pessoa escrever de novo. Pensada para rodar 2 vezes por dia, em horário fixo, em vez de olhar o WhatsApp o dia todo.
 
 Base: pesquisa sobre triagem de WhatsApp (responder ou ignorar). Quem lida bem com muita mensagem passa em janelas fixas, dá uma decisão só a cada conversa, não tenta zerar, e deixa a IA separar e rascunhar, nunca enviar sozinha. O dono pediu que a IA leia o contexto de cada conversa e já traga pelo menos duas respostas prontas para ele escolher, mais "Ignorar".
 
@@ -10,6 +10,11 @@ Base: pesquisa sobre triagem de WhatsApp (responder ou ignorar). Quem lida bem c
 
 1. **Período.** Se houver marca de passada anterior, use `wa_listar_conversas` com `com_novidades: true` (só o que chegou depois). Na primeira vez, use as últimas 24 h, sem perguntar; o dono pode pedir outro período. Releia o último registro em `relatorios/` e traga os itens "Depois" que continuam sem resposta.
 2. **Separar** com as regras de `pendencias.md` (passos 1 a 5): tire grupos, números do dono e encerramentos prováveis; classifique em "pede resposta", "pedido que ficou para trás" e "não pede".
+2b. **Juntar o resto do que precisa dele hoje**, na mesma fila, para ele não ter de pedir quatro rotinas:
+   - **Promessas vencendo:** `wa_memoria` (compromissos abertos). Entram os do dono com prazo vencido ou até amanhã. Viram pergunta com opções: cumprir agora (rascunho), pedir mais prazo, ou já feito (fecha o compromisso com `wa_anotar`).
+   - **Alertas da equipe:** se existir `rotinas/monitor-escola.md` na pasta do dono, leia o novo de cada grupo listado ali (`desde_o_ultimo_resumo: true`) e aplique os sinais de lá. Só entra o que bate num sinal; "tudo bem" vira uma linha no fim. Com muitos grupos, entregue a leitura a um subagente.
+   - **Perguntas de hoje e de ontem nos grupos de alunos ou clientes** (os grupos com mais `novas_desde_a_marca` que não são de equipe nem da lista de grupos que ele acompanha), pelas regras de `grupo-perguntas.md`. Pergunta mais velha que ontem não entra.
+   Ordene tudo junto por urgência: dinheiro e prazo vencendo primeiro, depois quem espera há mais tempo. Grupos que ele só acompanha (resumo de novidades) não entram na passada.
 3. **Ler o contexto de cada conversa que pede resposta.** Não decida pelas últimas mensagens soltas:
    - Comece pelas 20 mensagens que a separação já leu. Só volte mais (`antes_de`, de 20 em 20) se ainda não tiver entendido o contexto: de onde veio o assunto, o que a pessoa já tentou, o que o dono já disse sobre ele. Entendeu, pare. Não leia mais só por ler.
    - Se houver resumo guardado (`resumida_ate`), use-o como pano de fundo e leia só o que veio depois.
@@ -28,7 +33,8 @@ Base: pesquisa sobre triagem de WhatsApp (responder ou ignorar). Quem lida bem c
    Com mais de 4 conversas, mande a leva seguinte depois da resposta. Mostre antes, em uma linha, os ignorados automáticos por tipo (encerramento, automático, propaganda), sem lista.
 6. **Cartões, um por vez**, na ordem das escolhas. `wa_responder` sozinho na mensagem, com o texto escolhido (se a opção tem várias mensagens, um cartão por mensagem, em sequência). Espere o clique e confira com `wa_ler_conversa` que saiu antes do próximo. Envio desligado → o primeiro cartão é o `wa_envio`. Se o conector não estiver nesta sessão, diga que os cartões abrem no Claude Desktop e grave as escolhas no registro.
 7. **Marcar.** Para cada conversa respondida (depois de conferir que saiu) ou ignorada, `wa_marcar_resumo` com a `marca` da lista: ela só volta se chegar mensagem nova. As "Depois" **não** são marcadas e voltam na próxima passada. Diga em uma linha quantas foram marcadas.
-8. **Gravar** um registro curto em `relatorios/AAAA-MM-DD-passada-HHhMM.md`: o que foi respondido (com o texto), ignorado e deixado para depois, as pesquisas feitas e o que ficou de fora.
+8. **Gravar** um registro curto em `relatorios/AAAA-MM-DD-passada-HHhMM.md` (é ele que marca que a primeira vez já passou): o que foi respondido (com o texto), ignorado e deixado para depois, as pesquisas feitas e o que ficou de fora.
+9. **Última linha da resposta:** o lembrete do resto ("Também faço: resumo dos grupos · ideias de conteúdo · buscar · *"o que você faz?"* para ver tudo"). Antes dele, no máximo uma sugestão na hora certa (veja "Modo de operação" no SKILL.md).
 
 ## Pesquisar uma dúvida técnica
 

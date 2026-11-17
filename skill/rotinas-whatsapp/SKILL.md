@@ -23,7 +23,7 @@ As rotinas e as regras saíram de uma pesquisa sobre o que praticantes fazem com
 | O dono quer | Rotina | Arquivo |
 |---|---|---|
 | Saber quem espera resposta dele nas conversas individuais | Pendências | `references/pendencias.md` |
-| Limpar o WhatsApp rápido: escolher entre respostas prontas, deixar para depois ou ignorar | Passada | `references/passada.md` |
+| "Olha meu WhatsApp": tudo o que precisa dele hoje (privado, promessas, equipe, perguntas dos grupos), com respostas prontas para escolher | Passada | `references/passada.md` |
 | Responder o que ficou sem resposta num grupo | Perguntas do grupo | `references/grupo-perguntas.md` |
 | Pauta de conteúdo, frases literais ou resumo de um grupo | Conteúdo do grupo | `references/grupo-conteudo.md` |
 | Saber o que prometeu e o que prometeram a ele | Promessas | `references/promessas.md` |
@@ -31,43 +31,57 @@ As rotinas e as regras saíram de uma pesquisa sobre o que praticantes fazem com
 | Saber se os setores do negócio (grupos da equipe por setor) estão bem ou se algo precisa dele | Monitor da equipe | `references/monitor-escola.md` |
 | Ideias de uso, o que outras pessoas fazem, se uma prática é comum ou arriscada | Não é rotina: responda com a pesquisa | `references/pesquisa-de-usos.md` |
 
-Se o dono disse o que quer, vá direto para a rotina. Se chamou a skill sem pedido ou com pedido vago ("olha meu WhatsApp"), abra o painel abaixo.
+Se o dono disse o que quer, vá direto para a rotina. Se chamou a skill sem pedido ou com pedido vago ("olha meu WhatsApp", "me atualiza do zap"), siga "Modo de operação" abaixo.
 
-## Painel (chamada sem pedido)
+## Modo de operação (chamada sem pedido)
 
-O dono pediu que a skill, chamada sem pedido, mostre o que dá para fazer e roteie pelo que ele escolher, em vez de sair rodando uma rotina.
+O dono testou um cardápio de 13 itens e achou confuso: os nomes das rotinas se sobrepõem e, de manhã, ele só quer saber o que precisa dele. Mas quem é leigo também precisa descobrir o que a skill faz, porque recurso que não aparece não existe para ele. Por isso há três momentos.
 
-1. **Números de agora, sem ler conversa.** Depois do `wa_estado`, uma chamada só: `wa_listar_conversas` com `com_novidades: true` (sem marca anterior, `desde_horas: 24`) e `limite: 100`. Conte, sem abrir nenhuma conversa:
-   - individuais com novidade, sem as de `encerramento_provavel` e sem os números do dono;
-   - os 2 grupos com mais `novas_desde_a_marca` (nome e quantidade);
-   - há quantos dias rodou a Promessas (último `relatorios/*-promessas.md`).
-2. **Cardápio numerado na conversa, não `AskUserQuestion`.** O quadro de escolha só aceita 4 opções e esconde o resto; o dono escolheu a lista numerada, respondida com o número. Mostre em texto, agrupado, com os números de agora onde houver:
+### 1. Primeira vez, ou quando ele perguntar o que a skill faz
 
-   **Responder**
-   1. Passada: escolher a resposta, ignorar ou deixar para depois (N conversas com novidade)
-   2. Pendências: só o relatório de quem espera resposta, sem responder
+É a primeira vez quando a pasta do dono não tem nenhum `relatorios/*-passada*.md`. Também vale quando ele perguntar "o que você faz?", "o que dá pra fazer?", "me mostra as opções" ou "cardápio". Mostre este cardápio em texto, na linguagem dele, sem nome de rotina nem de ferramenta:
 
-   **Grupos**
-   3. Perguntas do grupo: o que ficou sem resposta (<grupo 1>: N novas; <grupo 2>: N novas)
-   4. Conteúdo do grupo: pauta, frases literais dos alunos ou resumo
-   5. Resumo dos grupos que você acompanha: novidades, dicas e insights dos grupos de que você participa
-   6. Monitor da equipe: os grupos da equipe por setor, tudo bem ou o que precisa de você
+> **Todo dia**
+> - **"olha meu WhatsApp"**: quem está esperando você, o que você prometeu, se a equipe precisa de você e as perguntas de hoje nos grupos de alunos. Você escolhe a resposta pronta, deixa para depois ou ignora.
+>
+> **Quando quiser**
+> - **"resumo dos grupos"**: novidades e dicas dos grupos de que você participa
+> - **"ideias de conteúdo"**: pauta e frases literais dos seus alunos ou clientes
+> - **"buscar ..."**: acho qualquer conversa, inclusive dentro de áudios
+> - **"puxar mensagens antigas de ..."**: trago o histórico que ainda não está aqui
+>
+> **Para eu ficar melhor**
+> - **"quem é quem"**: você me diz quem é cliente, aluno, família ou equipe
+> - **"respostas oficiais"**: preço, acesso e prazos que eu posso usar nas respostas
+> - **"o que você aprendeu comigo"**: as regras que tirei das suas edições, para você aprovar
 
-   **Acompanhar**
-   7. Promessas: o que você prometeu e o que te prometeram (última: há N dias)
-   8. Buscar em todo o WhatsApp, inclusive nos áudios transcritos
-   9. Puxar histórico antigo de um grupo ou conversa
+Feche com: "Quer que eu já olhe o seu WhatsApp agora?" Se ele disser sim, siga o momento 2.
 
-   **Ensinar e ajustar**
-   10. O que aprendi com você: regras tiradas das suas edições, para aprovar
-   11. Quem é quem: marcar cliente, aluno, família ou equipe
-   12. Respostas oficiais: gravar preço, acesso, prazos
-   13. Ideias de uso: o que outras pessoas fazem e o que é arriscado
+### 2. Nas outras vezes: a passada do dia, direto
 
-   Feche com uma linha: "Manda o número (ou diga o que quer)." e espere. Se houver item que pede atenção (ex.: conversa esperando há mais de 2 dias), uma linha antes do cardápio basta.
-3. **Rotear.** Siga a rotina escolhida a partir do passo dela que vem depois da listagem (a lista já está na mão). Em grupo, se o dono não disser qual, use o de mais mensagens novas e diga qual foi. Os itens que não são rotina: 8 é `wa_buscar` (pergunte o que buscar); 9 é `wa_buscar_historico` (só com pedido dele; veja `limites.md`); 10 é `wa_edicoes_dos_rascunhos` e `wa_aprender` (ver "Aprender com as edições"); 11 é `wa_aprender` com `tipo_da_conversa`, uma pessoa por vez; 12 é montar blocos de `respostas-oficiais.md` a partir do que ele já respondeu nos grupos (`wa_buscar` com `de_mim: true` por assunto, mais os avisos dele), um por pergunta, para ele aprovar ou corrigir; antes de mostrar, diga em uma frase que o bloco serve para a próxima pessoa que perguntar, não para quem já foi respondido; 13 responde com `references/pesquisa-de-usos.md`. Texto livre: escolha pela tabela acima; se nada servir, diga o que a skill não faz.
+Sem pedido, não mostre cardápio: rode a Passada (`references/passada.md`), que junta numa fila só, por urgência, tudo o que precisa dele:
+- conversas individuais esperando resposta;
+- promessas dele vencendo ou vencidas (`wa_memoria`, compromissos abertos com prazo até amanhã);
+- alertas da equipe, pelos sinais aprovados em `rotinas/monitor-escola.md`, se a lista existir;
+- perguntas sem resposta de hoje e de ontem nos grupos de alunos ou clientes.
 
-O painel não substitui pedido claro: "responde o pessoal do grupo X" vai direto para Perguntas do grupo, sem painel.
+Ela termina nos cartões de múltipla escolha. A última linha da resposta é sempre um lembrete curto do resto, para ele nunca esquecer que existe (vale no fim de qualquer rotina; tire do lembrete o item que acabou de rodar):
+
+> Também faço: resumo dos grupos · ideias de conteúdo · buscar · *"o que você faz?"* para ver tudo
+
+### 3. Sugestão na hora certa
+
+Ofereça um recurso, em uma linha e no máximo um por resposta, quando ele resolve algo que acabou de aparecer:
+- a mesma dúvida chegou de duas pessoas, ou ele escreveu uma resposta que vale para outras vezes: "quer gravar isso como resposta oficial?";
+- alguém importante aparece sem nome ou sem tipo: "quem é esse? (cliente, aluno, família...)";
+- um grupo que ele acompanha passou de ~100 mensagens novas: "quer o resumo do <grupo>?";
+- ele corrigiu um rascunho do mesmo jeito duas vezes: "notei que você sempre <x>; quer que vire regra?".
+
+Sugestão é convite, não ação: nada roda sem ele dizer sim.
+
+### Rotear pedido em texto livre
+
+Escolha pela tabela acima. Os pedidos que não são rotina: "buscar" é `wa_buscar` (pergunte o que buscar, se não disse); "mensagens antigas" é `wa_buscar_historico` (só com pedido dele; veja `limites.md`); "o que aprendeu" é `wa_edicoes_dos_rascunhos` e `wa_aprender` (ver "Aprender com as edições"); "quem é quem" é `wa_aprender` com `tipo_da_conversa`, uma pessoa por vez; "respostas oficiais" é montar blocos de `respostas-oficiais.md` a partir do que ele já respondeu (`wa_buscar` com `de_mim: true` por assunto), um por pergunta, para ele aprovar, dizendo antes que o bloco serve para a próxima pessoa que perguntar; ideias de uso respondem com `references/pesquisa-de-usos.md`. Se nada servir, diga o que a skill não faz.
 
 ## Regras que valem em todas as rotinas
 
