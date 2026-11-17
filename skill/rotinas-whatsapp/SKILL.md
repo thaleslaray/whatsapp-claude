@@ -65,9 +65,7 @@ Sem pedido, não mostre cardápio: rode a Passada (`references/passada.md`), que
 - alertas da equipe, pelos sinais aprovados em `rotinas/monitor-escola.md`, se a lista existir;
 - perguntas sem resposta de hoje e de ontem nos grupos de alunos ou clientes.
 
-Ela termina nos cartões de múltipla escolha. A última linha da resposta é sempre um lembrete curto do resto, para ele nunca esquecer que existe (vale no fim de qualquer rotina; tire do lembrete o item que acabou de rodar):
-
-> Também faço: resumo dos grupos · ideias de conteúdo · buscar · *"o que você faz?"* para ver tudo
+Ela termina nos cartões de múltipla escolha. Depois, como no fim de qualquer rotina, vem a pergunta de próximo passo (veja "Como entregar").
 
 ### 3. Sugestão na hora certa
 
@@ -130,8 +128,14 @@ Com o aprendizado ligado, `meu-jeito.md` continua valendo para o que número nen
 
 - Comece pelo que o dono precisa fazer, não pelo método.
 - Grave o relatório completo na pasta dele, em `relatorios/AAAA-MM-DD-<rotina>.md`, e mostre na conversa só o essencial, com o caminho do arquivo.
+- **Releia na hora antes de mostrar uma pendência ou alerta.** Leitura de subagente ou de minutos atrás pode estar velha: abra de novo a conversa em volta do pedido. Resposta do dono por imagem, arquivo ou áudio, seguida de "ok" ou figurinha de quem pediu, conta como resolvida. Alerta já resolvido irrita mais que alerta perdido.
 - Feche dizendo o que ficou de fora: conversas não lidas, áudios não transcritos, remetentes que não deu para identificar.
 - Se houver respostas a dar, ofereça abrir os cartões um por um. Não abra sem o dono pedir.
+- **Toda rotina termina numa pergunta de múltipla escolha** (`AskUserQuestion`; sem ela, a mesma lista em texto numerado). O dono pediu: clicar é mais fácil que lembrar o que pedir, e recurso que não aparece não existe para ele. Até 4 opções, curtas, nesta ordem:
+  1. **Aprofundar o que acabou de rodar**, com o alvo concreto tirado do resultado ("Abrir o PDF do planejamento", "Ver as perguntas do Hermes", "Transcrever os áudios do Joaquim"), não um genérico "aprofundar";
+  2. e 3. **Outras rotinas** que façam sentido agora, com o motivo em números na descrição ("Resumo dos grupos — Hermes tem 705 novas"); nunca a que acabou de rodar;
+  4. **"Nada por agora"**.
+  O "Outro" automático cobre o resto. Não repita a pergunta se o dono acabou de recusar na mesma conversa.
 
 ## Quando o volume é grande
 

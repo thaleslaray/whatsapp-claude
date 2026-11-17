@@ -53,6 +53,8 @@ Recorte lido: de <data hora> a <data hora>, N mensagens.
 
 ## Cuidados
 
+- **Aula, aviso e data valem só para a turma do grupo onde apareceram.** Antes de usar numa resposta uma aula ou link visto em outro grupo, confira se é da mesma turma (5ª Ed., 6ª Ed., Black...). Em 17/11/2026 a fase extra da 6ª Ed. foi sugerida como resposta a um aluno da 5ª, e o dono pegou o erro.
+
 - **Quem perguntou.** Em muitos grupos o remetente vem como "número oculto", porque o WhatsApp só entrega o identificador novo da pessoa. Dá para responder citando a mensagem, mas não para dizer quem é. Não tente adivinhar; diga no relatório quantos remetentes vieram ocultos.
 - **Grupo grande.** `wa_listar_grupos` devolve `participantes`: informe no relatório. Resposta em grupo vai para todo mundo. Prefira resposta curta que sirva a quem tem a mesma dúvida, e sugira ao dono quando uma pergunta merece aviso fixado em vez de resposta solta (por exemplo, a mesma dúvida de acesso três vezes no dia).
 - **Pergunta que é reclamação.** Se a mensagem é uma queixa do produto ou do atendimento, não rascunhe defesa. Mostre ao dono e pergunte como ele quer tratar; às vezes a resposta certa é no privado.

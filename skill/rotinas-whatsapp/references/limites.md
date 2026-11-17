@@ -28,6 +28,7 @@ Em qualquer versão dá para responder citando a mensagem (`citar`), porque isso
 
 - Chame a ferramenta que mostra cartão **sozinha**, sem outra chamada na mesma mensagem, e uma de cada vez.
 - Às vezes o cartão não desenha e aparece um bloco de texto no lugar dos botões. Nada aconteceu. Chame a mesma ferramenta de novo; se repetir, peça ao dono para fechar o Claude Desktop de vez e abrir de novo.
+- No cartão do lote (`wa_responder_lote`), caixa de mensagem vazia trava o envio. Se o dono quiser tirar uma das mensagens, cancele (`wa_cancelar`, não envia nada) e abra outro lote sem ela.
 - O dono pode editar o texto dentro do cartão antes de enviar. Por isso o rascunho é ponto de partida, não versão final.
 - O cartão de cancelar não manda nada; conferir depois (`wa_ler_conversa`) é o que prova se uma mensagem saiu.
 - O envio começa desligado depois de cada pareamento. `wa_envio` liga, também com cartão.
