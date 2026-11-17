@@ -40,7 +40,7 @@ Depois disso, abra o arquivo `whatsapp-pessoal.mcpb` que ficou em Downloads, con
 
 | Parte | O que é | O que faz |
 |---|---|---|
-| **Extensão do WhatsApp** ([`mcp/`](mcp/)) | Um servidor MCP empacotado como extensão `.mcpb` do Claude Desktop. MCP é a ponte que deixa o Claude usar um programa. | Dá ao Claude 33 ferramentas para ler e, com o seu clique, escrever no **seu** WhatsApp. Funciona no chat e na aba Code. |
+| **Extensão do WhatsApp** ([`mcp/`](mcp/)) | Um servidor MCP empacotado como extensão `.mcpb` do Claude Desktop. MCP é a ponte que deixa o Claude usar um programa. | Dá ao Claude 34 ferramentas para ler e, com o seu clique, escrever no **seu** WhatsApp. Funciona no chat e na aba Code. |
 | **Skill de rotinas** ([`skill/rotinas-whatsapp`](skill/rotinas-whatsapp/)) | Um conjunto de rotinas que o Claude segue com você. O pacote para instalar é [`skill/rotinas-whatsapp.skill`](skill/rotinas-whatsapp.skill). | Quem espera resposta, escolha rápida entre respostas prontas, perguntas sem resposta num grupo, pauta e frases de um grupo, promessas, resumo dos grupos que você acompanha e monitor dos grupos da equipe por setor. Nenhuma rotina envia nada sozinha. |
 
 ## Tudo que dá para fazer
@@ -82,6 +82,7 @@ Depois de instalado, é só conversar com o Claude do seu jeito. Não precisa sa
 | Peça assim | O que o Claude faz | Seu clique |
 |---|---|---|
 | "Responde a Ana que eu chego às 15h" | Prévia com o texto, que dá para editar. Em grupo, o cartão mostra quantas pessoas vão receber | Sim |
+| "Responde o Leonardo, minha mãe e a Jhenifer de uma vez" | Um cartão só com várias conversas: dá para editar cada mensagem e desmarcar quem não deve receber. Um clique em "Enviar todas" | Sim |
 | "Manda este PDF para o Beto" | Envia foto, vídeo, áudio, mensagem de voz (OGG/Opus) ou documento do computador, com legenda editável | Sim |
 | "Começa uma conversa com +55 11 91234-5678" | Primeira mensagem para um número novo. O cartão mostra o número inteiro. Conta no limite do dia e no teto de conversas novas | Sim |
 | "Corrige aquela mensagem" | Edita uma mensagem de texto sua, até 15 min depois | Sim |

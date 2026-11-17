@@ -56,7 +56,7 @@ describe("ferramentas", () => {
       assert.deepEqual(nomes, [
         "wa_abrir_midia", "wa_anotar", "wa_apagar", "wa_aprender", "wa_atualizar_contatos", "wa_bloquear_conversas", "wa_buscar", "wa_buscar_historico", "wa_cancelar", "wa_cancelar_pedido", "wa_como_eu_respondi", "wa_conferir_rascunho", "wa_confirmar", "wa_confirmar_tela", "wa_desconectar",
         "wa_edicoes_dos_rascunhos", "wa_editar", "wa_enviar_arquivo", "wa_envio", "wa_escolher_grupos", "wa_esquecer", "wa_estado", "wa_estado_pareamento_tela", "wa_estado_pedido_tela", "wa_exemplos_do_meu_jeito", "wa_iniciar_conversa", "wa_ler_conversa",
-        "wa_listar_conversas", "wa_listar_grupos", "wa_marcar_resumo", "wa_memoria", "wa_meu_jeito", "wa_parear", "wa_qr", "wa_reagir", "wa_responder", "wa_transcrever",
+        "wa_listar_conversas", "wa_listar_grupos", "wa_marcar_resumo", "wa_memoria", "wa_meu_jeito", "wa_parear", "wa_qr", "wa_reagir", "wa_responder", "wa_responder_lote", "wa_transcrever",
       ]);
       const instrucoes = c.getInstructions() ?? "";
       assert.match(instrucoes, /O que NÃO dá para fazer/);

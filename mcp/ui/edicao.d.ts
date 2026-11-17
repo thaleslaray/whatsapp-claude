@@ -20,3 +20,9 @@ export function mensagemAtualParaMostrar(sc: { mensagem_atual?: unknown } | null
 export function rotuloDoTextoEditavel(tipo: string): string;
 export function rotuloDaMensagemAtual(tipo: string): string;
 export function arquivoParaMostrar(sc: unknown): { nome: string; tipo: string; tamanho: string; caminho: string; imagem?: string } | null;
+export function serializarLote(enviar: boolean[], mensagens: string[][]): string;
+export function lerLote(texto: string): { enviar: boolean[]; mensagens: string[][] };
+export function contarMarcados(enviar: boolean[]): number;
+export function rotuloDoBotaoDoLote(n: number): string;
+export function itensDoLoteParaMostrar(sc: unknown): Array<{ alvo: string; destaque: string; nome: string; ultima: { data: string; texto: string } | null; citada: string }>;
+export function resultadoDoLoteParaMostrar(resultado: unknown): Array<{ conversa: string; estado: string; texto: string }>;

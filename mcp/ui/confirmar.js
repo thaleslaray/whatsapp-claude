@@ -30,10 +30,16 @@ import {
   arquivoParaMostrar,
   codigoEditado,
   confirmacaoPeloChat,
+  contarMarcados,
   dataCurta,
   destaqueParaMostrar,
   destinatario,
+  itensDoLoteParaMostrar,
   itensParaMostrar,
+  lerLote,
+  resultadoDoLoteParaMostrar,
+  rotuloDoBotaoDoLote,
+  serializarLote,
   mensagemAtualParaMostrar,
   podeEnviar,
   rotuloDaMensagemAtual,
@@ -52,6 +58,7 @@ let encerrado = false; // pedido já usado ou cancelado: o cartão nunca mais de
 let cliqueDado = false; // o dono clicou: a consulta de estado que voltar depois não mexe mais no cartão
 let geracao = 0; // cada resultado de ferramenta recebido abre uma geração; consulta de geração velha é descartada
 let relogioDoQr = null;
+let lote = null; // 0.17.0 (wa_responder_lote): { marcas: [<input checkbox>], caixas: [[<textarea>]] }
 
 function el(tag, classe, texto) {
   const e = document.createElement(tag);
@@ -85,8 +92,16 @@ function mostrarEstado(texto, tipo) {
 }
 
 function textoAtual() {
+  if (lote) return serializarLote(lote.marcas.map((m) => m.checked), lote.caixas.map((cs) => cs.map((c) => c.value)));
   const campo = $("campo-texto");
   return campo ? campo.value : null;
+}
+
+/** Lote: quantos itens marcados e se todo item marcado tem texto válido (não vazio, até o limite). */
+function situacaoDoLote() {
+  const marcados = lote.marcas.filter((m) => m.checked).length;
+  const valido = lote.marcas.every((m, i) => !m.checked || lote.caixas[i].every((c) => podeEnviar(c.value, 4096, "caracteres")));
+  return { marcados, valido };
 }
 
 function atualizarBotoes() {
@@ -94,6 +109,12 @@ function atualizarBotoes() {
   if (cancelar) cancelar.disabled = travado;
   const acao = $("acao");
   if (!acao) return;
+  if (lote) {
+    const { marcados, valido } = situacaoDoLote();
+    acao.textContent = rotuloDoBotaoDoLote(marcados);
+    acao.disabled = travado || marcados === 0 || !valido;
+    return;
+  }
   const texto = textoAtual();
   const invalido = pedido && pedido.edicao && texto !== null && !podeEnviar(texto, pedido.edicao.limite, pedido.edicao.unidade, pedido.edicao.vazio === true);
   acao.disabled = travado || Boolean(invalido);
@@ -103,6 +124,10 @@ function travar(valor) {
   travado = valor || encerrado;
   const campo = $("campo-texto");
   if (campo) campo.readOnly = travado;
+  if (lote) {
+    for (const m of lote.marcas) m.disabled = travado;
+    for (const cs of lote.caixas) for (const c of cs) c.readOnly = travado;
+  }
   atualizarBotoes();
 }
 
@@ -147,6 +172,76 @@ function blocoDoTexto(sc) {
   bloco.append(rotulo, campo, contador);
   queueMicrotask(atualizar);
   return bloco;
+}
+
+/** 0.17.0: o cartão do lote. Uma seção por item: quem é, a última recebida (só ler), as mensagens editáveis e "enviar este". */
+function blocoDoLote(sc) {
+  const itens = itensDoLoteParaMostrar(sc);
+  let decisao;
+  try {
+    decisao = lerLote(sc.texto);
+  } catch {
+    return el("p", "estado erro", "Não consegui ler o lote. Peça de novo ao Claude.");
+  }
+  lote = { marcas: [], caixas: [] };
+  const bloco = el("div", "lote");
+  itens.forEach((it, i) => {
+    const secao = el("section", "item-do-lote");
+    const cabeca = el("label", "item-cabeca");
+    const marca = document.createElement("input");
+    marca.type = "checkbox";
+    marca.checked = decisao.enviar[i] !== false;
+    marca.addEventListener("change", () => {
+      secao.classList.toggle("desmarcado", !marca.checked);
+      atualizarBotoes();
+    });
+    const nome = it.nome ? it.nome + " (" + it.alvo + ")" : it.alvo;
+    cabeca.append(marca, el("span", "item-nome", "Enviar este: " + nome));
+    secao.append(cabeca);
+    if (it.destaque) secao.append(el("p", "destaque", it.destaque));
+    if (it.ultima) {
+      const quando = dataCurta(it.ultima.data);
+      secao.append(el("p", "rotulo", "Última mensagem que você recebeu (só para ler)" + (quando ? " · " + quando : "")), el("p", "texto atual", it.ultima.texto));
+    }
+    if (it.citada) secao.append(el("p", "rotulo", "Respondendo a"), el("p", "texto atual", it.citada));
+    const caixas = [];
+    const mensagens = decisao.mensagens[i] || [];
+    mensagens.forEach((texto, k) => {
+      const rotulo = el("label", "rotulo", mensagens.length > 1 ? "Mensagem " + (k + 1) + " de " + mensagens.length + " (você pode editar)" : "Sua resposta (você pode editar)");
+      const campo = document.createElement("textarea");
+      campo.className = "texto campo";
+      campo.rows = 1;
+      campo.value = texto;
+      campo.spellcheck = true;
+      campo.addEventListener("input", () => {
+        ajustarAltura(campo);
+        campo.classList.toggle("excedeu", !podeEnviar(campo.value, 4096, "caracteres"));
+        atualizarBotoes();
+      });
+      rotulo.append(campo);
+      secao.append(rotulo);
+      caixas.push(campo);
+      queueMicrotask(() => ajustarAltura(campo));
+    });
+    secao.classList.toggle("desmarcado", !marca.checked);
+    lote.marcas.push(marca);
+    lote.caixas.push(caixas);
+    bloco.append(secao);
+  });
+  return bloco;
+}
+
+/** Depois do envio: uma linha por item (enviado, falhou e por quê, ou desmarcado). */
+function mostrarResultadoDoLote(resultado) {
+  const itens = resultadoDoLoteParaMostrar(resultado);
+  const area = $("resultado-do-lote");
+  if (!area || itens.length === 0) return;
+  area.replaceChildren();
+  for (const i of itens) {
+    const li = el("li", i.estado === "enviado" ? "ok" : i.estado === "nao_enviado" ? "" : "erro", i.texto || i.conversa);
+    area.append(li);
+  }
+  area.hidden = false;
 }
 
 /** O que veio de outra pessoa: últimas mensagens recebidas, a citada e os nomes (grupos e contatos). Só para ler. */
@@ -196,7 +291,7 @@ function desenhar(sc) {
   const destaque = destaqueParaMostrar(sc);
   if (destaque) raiz.append(el("p", "destaque", destaque));
 
-  if (sc.tipo !== "parear") {
+  if (sc.tipo !== "parear" && sc.tipo !== "responder_lote") {
     const para = el("p", "linha");
     para.append(el("b", "", "Para: "), document.createTextNode(destinatario(sc)));
     raiz.append(para);
@@ -228,7 +323,7 @@ function desenhar(sc) {
     raiz.append(bloco);
   }
 
-  const terceiros = blocoDeTerceiros(sc);
+  const terceiros = sc.tipo === "responder_lote" ? null : blocoDeTerceiros(sc);
   if (terceiros) raiz.append(terceiros);
   const atual = mensagemAtualParaMostrar(sc);
   if (atual) {
@@ -237,7 +332,13 @@ function desenhar(sc) {
     bloco.append(el("p", "rotulo", rotuloDaMensagemAtual(sc.tipo) + (quando ? " · " + quando : "")), el("p", "texto atual", atual.texto));
     raiz.append(bloco);
   }
-  if (typeof sc.texto === "string") raiz.append(blocoDoTexto(sc));
+  if (sc.tipo === "responder_lote") {
+    raiz.append(blocoDoLote(sc));
+    const resultado = el("ul", "resultado-do-lote");
+    resultado.id = "resultado-do-lote";
+    resultado.hidden = true;
+    raiz.append(resultado);
+  } else if (typeof sc.texto === "string") raiz.append(blocoDoTexto(sc));
 
   const { aVista, recolhidas } = separarDetalhes(sc.detalhes);
   const listaDe = (linhas) => {
@@ -363,7 +464,7 @@ async function decidir(decisao) {
   const editado = atual !== null && atual !== pedido.original ? atual : null;
   const codigo = editado !== null ? codigoEditado(pedido.codigo, editado) : pedido.codigo;
   travar(true);
-  mostrarEstado(pedido.tipo === "responder" ? "Enviando… clique uma vez e espere." : "Um momento… clique uma vez e espere.");
+  mostrarEstado(pedido.tipo === "responder" || pedido.tipo === "responder_lote" ? "Enviando… clique uma vez e espere." : "Um momento… clique uma vez e espere.");
   const comServerTools = temServerTools();
   const minhaGeracao = geracao;
   try {
@@ -374,12 +475,14 @@ async function decidir(decisao) {
           : { name: "wa_cancelar_pedido", arguments: { id: pedido.id } },
       );
       mostrarEstado(textoDoResultado(r) || (r.isError ? "Não deu certo." : "Pronto."), r.isError ? "erro" : "ok");
+      if (lote && !r.isError && r.structuredContent && r.structuredContent.resultado) mostrarResultadoDoLote(r.structuredContent.resultado);
       if (r.isError && decisao === "confirmar" && editado !== null && !/cancelado|venceu|já foi usado|não existe/.test(textoDoResultado(r))) {
         // Texto recusado pelo servidor (vazio, grande demais): o pedido segue pendente, o dono pode corrigir.
         travar(false);
         return;
       }
       encerrar();
+      if (!r.isError && pedido.tipo !== "parear") await avisarOClaude(decisao, r);
       if (!r.isError && decisao === "confirmar" && pedido.tipo === "parear") await acompanharQr(minhaGeracao);
       return;
     }
@@ -398,6 +501,31 @@ async function decidir(decisao) {
     mostrarEstado("O app do Claude não aceitou a mensagem. Clique de novo, uma vez, e espere.", "erro");
     travar(false);
   }
+}
+
+/**
+ * Depois do clique pelo servidor (serverTools), o Claude não fica sabendo: callServerTool não volta ao modelo.
+ * Avisa por dois caminhos do MCP Apps: ui/update-model-context (contexto da próxima resposta) e ui/message
+ * (mensagem na conversa, que acorda o Claude para seguir sozinho). Só informa o resultado; nunca leva código.
+ * Falhar aqui não desfaz nada: o envio já aconteceu e o cartão já mostrou o resultado.
+ */
+async function avisarOClaude(decisao, r) {
+  let texto;
+  if (decisao !== "confirmar") {
+    texto = `[cartão ${pedido.id}] Cancelei. Nada foi enviado.`;
+  } else {
+    const res = r && r.structuredContent && r.structuredContent.resultado;
+    if (Array.isArray(res)) {
+      const linhas = res.map((i) => i.frase || `${i.conversa}: ${i.estado}`).join("; ");
+      texto = `[cartão ${pedido.id}] Cliquei em Enviar todas. Resultado: ${linhas}. Pode seguir.`;
+    } else {
+      texto = `[cartão ${pedido.id}] Cliquei em Enviar. ${textoDoResultado(r) || "Enviado."} Pode seguir.`;
+    }
+  }
+  const content = [{ type: "text", text: texto.slice(0, 2000) }];
+  // Só o contexto silencioso: no Claude Desktop o ui/message cai na caixa de digitação e obriga o dono a apertar
+  // Enter (testado em 17/11/2026). Na aba Code, a skill vigia o acoes.jsonl e o Claude acorda sozinho.
+  try { await app.updateModelContext({ content }); } catch { /* host sem suporte */ }
 }
 
 /** Cartão remontado: pergunta ao servidor como está o pedido e se ajusta. Se a consulta falhar, o cartão fica como está. */
@@ -516,6 +644,7 @@ app.ontoolresult = (resultado) => {
     return;
   }
   const edicao = sc.texto_editavel && typeof sc.texto_editavel.limite === "number" && typeof sc.texto === "string" ? sc.texto_editavel : null;
+  lote = null;
   pedido = { id: sc.pedido, codigo: meta.codigo, tipo: sc.tipo || "responder", original: typeof sc.texto === "string" ? sc.texto : null, edicao };
   cliqueDado = false;
   encerrado = false;

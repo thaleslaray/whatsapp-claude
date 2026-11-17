@@ -32,7 +32,7 @@ export const RISCOS_DO_PAREAMENTO = [
 /** Conta caracteres como a pessoa conta (emoji = 1). */
 const caracteres = (t: string): number => [...t].length;
 
-function validarTexto(texto: string): string {
+export function validarTexto(texto: string): string {
   if (texto.trim() === "") throw new Error("O texto da resposta está vazio. Nada foi enviado.");
   if (caracteres(texto) > LIMITE_DO_TEXTO) throw new Error(`O texto tem ${caracteres(texto)} caracteres; o máximo é ${LIMITE_DO_TEXTO}. Nada foi enviado.`);
   return texto;

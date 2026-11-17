@@ -38,6 +38,8 @@ export class SocketFalso {
   idDevolvido: string | undefined;
   /** Teste: o sendMessage falha com este erro. */
   falharEnvio: Error | undefined;
+  /** Teste: o sendMessage de ordem N (1 = o primeiro) falha, e só ele. */
+  falharEnvioNumero: number | undefined;
   /** Teste: números (jid) que NÃO têm WhatsApp no onWhatsApp. */
   semWhatsApp = new Set<string>();
   /** Teste: o onWhatsApp devolve este jid no lugar do pedido (o WhatsApp corrige o nono dígito, por exemplo). */
@@ -99,6 +101,7 @@ export class SocketFalso {
   async sendMessage(...args: unknown[]) {
     this.#registrar("sendMessage", args);
     if (this.falharEnvio) throw this.falharEnvio;
+    if (this.falharEnvioNumero !== undefined && this.chamadas.filter((c) => c.metodo === "sendMessage").length === this.falharEnvioNumero) throw new Error("o WhatsApp recusou a mensagem");
     const pedido = (args[2] as { messageId?: string } | undefined)?.messageId;
     return { key: { remoteJid: args[0], fromMe: true, id: this.idDevolvido ?? pedido ?? "enviada" } };
   }

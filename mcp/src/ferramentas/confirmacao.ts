@@ -41,7 +41,7 @@ const EntradaConfirmar = z.strictObject({
   codigo: z.string().min(1).max(128).describe("Código que chegou numa mensagem do dono depois do clique dele. Nunca peça nem adivinhe."),
   texto: z
     .string()
-    .max(20_000)
+    .max(400_000)
     .optional()
     .describe("O texto que veio na mensagem do dono (toda confirmação de resposta traz o texto); copie exatamente, sem mudar nada. Sem texto na mensagem, não passe"),
 });
@@ -171,7 +171,7 @@ export function registrarConfirmacao(server: McpServer, ctx: Contexto): void {
         "Executa de verdade um pedido que já mostrou a prévia num cartão. SÓ chame depois que o dono clicar no botão do cartão e uma mensagem dele trouxer o id e o código " +
         '("Confirmo o pedido <id>, código <codigo>."). Nunca peça o código a ele nem tente adivinhar. Executa exatamente o que estava na prévia. ' +
         'Numa resposta (wa_responder), a mensagem do dono sempre traz o texto ("Confirmo o pedido <id>, código <codigo>, com este texto:" e o texto numa linha nova), editado ou não: ' +
-        "passe `texto` copiado exatamente, sem mudar nada; o código só vale junto com esse texto. Nos outros pedidos a mensagem traz só o id e o código: não passe `texto`. " +
+        "passe `texto` copiado exatamente, sem mudar nada; o código só vale junto com esse texto. O mesmo vale para wa_responder_lote (o texto é uma linha JSON com a decisão do dono: copie inteira). Nos outros pedidos a mensagem traz só o id e o código: não passe `texto`. " +
         "No pareamento (wa_parear), a confirmação começa o pareamento e desenha um cartão com o QR (você nunca vê o QR): depois siga o para_o_claude do resultado.",
       inputSchema: EntradaConfirmar,
     },

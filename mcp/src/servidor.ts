@@ -11,6 +11,7 @@ import { registrarComoEuRespondi } from "./ferramentas/como-eu-respondi.ts";
 import { registrarConferirRascunho } from "./ferramentas/conferir-rascunho.ts";
 import { registrarContatos } from "./ferramentas/contatos.ts";
 import { registrarJeito } from "./ferramentas/jeito.ts";
+import { registrarLote } from "./ferramentas/lote.ts";
 import { registrarLeituras } from "./ferramentas/leitura.ts";
 import { registrarListas } from "./ferramentas/listas.ts";
 import { registrarMaisEscritas } from "./ferramentas/mais-escrita.ts";
@@ -50,11 +51,11 @@ Como agir:
 - O Claude Desktop pode abrir mais de uma sessão do Claude com este servidor (a conversa comum e a aba Code). Só uma fica com a conexão do WhatsApp; as outras falam com o WhatsApp através dela, sozinhas: use as ferramentas normalmente, em qualquer sessão. Se uma ferramenta disser que não conseguiu falar com a outra sessão do Claude, nada foi feito: tente de novo em instantes.
 
 Cartões (nada acontece sem o clique do dono):
-- wa_parear (só sem sessão salva), wa_envio (ligar ou desligar o envio), wa_responder (conversa individual ou grupo escolhido, mesmo sem mensagem guardada ainda), wa_enviar_arquivo (arquivo deste computador, caminho completo, só das pastas Documentos, Mesa, Downloads, Imagens, Filmes/Vídeos e Músicas do dono, para conversa que já existe ou grupo escolhido; legenda editável), wa_iniciar_conversa (número que nunca falou com o dono), wa_editar (mensagem de texto sua, até 15 min), wa_apagar (mensagem sua, para todos, até 48 h), wa_desconectar, wa_escolher_grupos com \`adicionar\` e wa_bloquear_conversas com \`liberar\` mostram uma prévia num cartão. Depois de uma prévia, pare e espere o clique; não chame a ferramenta de novo.
+- wa_parear (só sem sessão salva), wa_envio (ligar ou desligar o envio), wa_responder (conversa individual ou grupo escolhido, mesmo sem mensagem guardada ainda), wa_responder_lote (de 1 a 10 conversas num cartão só, com 1 a 5 mensagens cada, aprovadas com um clique; use quando o dono pedir várias respostas de uma vez), wa_enviar_arquivo (arquivo deste computador, caminho completo, só das pastas Documentos, Mesa, Downloads, Imagens, Filmes/Vídeos e Músicas do dono, para conversa que já existe ou grupo escolhido; legenda editável), wa_iniciar_conversa (número que nunca falou com o dono), wa_editar (mensagem de texto sua, até 15 min), wa_apagar (mensagem sua, para todos, até 48 h), wa_desconectar, wa_escolher_grupos com \`adicionar\` e wa_bloquear_conversas com \`liberar\` mostram uma prévia num cartão. Depois de uma prévia, pare e espere o clique; não chame a ferramenta de novo.
 - wa_reagir age na hora, sem cartão (dá para desfazer com emoji vazio), e fica registrada. Só reaja quando o dono pedir.
-- Só chame wa_confirmar com um código que chegou numa mensagem do dono; nunca peça o código nem tente adivinhar. A confirmação de um pedido com texto (wa_responder, wa_iniciar_conversa, wa_editar, wa_enviar_arquivo com a legenda, que pode vir vazia) sempre traz o texto ("Confirmo o pedido <id>, código <codigo>, com este texto:" e o texto), editado ou não: passe \`texto\` copiado exatamente; o código só vale junto com esse texto. Nos outros pedidos (sem texto), não passe \`texto\`.
+- Só chame wa_confirmar com um código que chegou numa mensagem do dono; nunca peça o código nem tente adivinhar. A confirmação de um pedido com texto (wa_responder, wa_responder_lote, wa_iniciar_conversa, wa_editar, wa_enviar_arquivo com a legenda, que pode vir vazia) sempre traz o texto ("Confirmo o pedido <id>, código <codigo>, com este texto:" e o texto), editado ou não: passe \`texto\` copiado exatamente; o código só vale junto com esse texto. Nos outros pedidos (sem texto), não passe \`texto\`.
 - Se o dono disser "Cancelo o pedido <id>.", chame wa_cancelar. Se a ferramenta disser "Bloqueado", o cartão não pôde ser mostrado e nada aconteceu: diga isso a ele. Nunca chame wa_confirmar_tela, wa_cancelar_pedido, wa_estado_pedido_tela nem wa_estado_pareamento_tela: são só do cartão.
-- O envio começa desligado. Com ele desligado, wa_responder, wa_enviar_arquivo, wa_iniciar_conversa, wa_reagir, wa_editar e wa_apagar recusam: ofereça wa_envio, e o dono liga no cartão. Há um limite de respostas por dia (wa_estado mostra), um teto baixo de conversas novas por dia e um teto de reações por dia.
+- O envio começa desligado. Com ele desligado, wa_responder, wa_responder_lote, wa_enviar_arquivo, wa_iniciar_conversa, wa_reagir, wa_editar e wa_apagar recusam: ofereça wa_envio, e o dono liga no cartão. Há um limite de respostas por dia (wa_estado mostra), um teto baixo de conversas novas por dia e um teto de reações por dia.
 - Começar conversa com quem não tem o número do dono é o que mais leva o WhatsApp a banir: só use wa_iniciar_conversa quando o dono pedir, com o número que ele deu.
 - Pareamento: você nunca vê o QR; ele só aparece no cartão. Na conversa comum, o clique no cartão do wa_parear já mostra o QR e ele se renova sozinho. Na aba Code, o clique manda "Confirmo o pedido <id>, código <codigo>.": chame wa_confirmar, e o resultado desenha um cartão com o QR. Depois, se chegar "Mostre um novo QR do pareamento (pedido <id>)", chame wa_qr com esse pedido; se chegar "Já escaneei o QR do pareamento (pedido <id>)...", chame wa_estado para conferir. wa_qr só funciona com um pareamento que o dono já autorizou no cartão; ela nunca começa um.
 
@@ -81,6 +82,7 @@ export function fabricaDeServidor(ctx: Contexto, extras: readonly RegistroExtra[
     registrarComoEuRespondi(server, ctx);
     registrarConferirRascunho(server, ctx);
     registrarEscritas(server, ctx);
+    registrarLote(server, ctx);
     registrarMaisEscritas(server, ctx);
     registrarMidia(server, ctx);
     registrarTranscricao(server, ctx);

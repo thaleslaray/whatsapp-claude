@@ -207,7 +207,7 @@ describe("anti-vazamento: chave, credenciais e números não saem em lugar nenhu
       const { cliente, fechar } = await conectarCliente(alvo.ctx);
       try {
         const { tools } = await cliente.listTools();
-        assert.equal(tools.length, 37);
+        assert.equal(tools.length, 38);
         saidas.push(JSON.stringify(tools), cliente.getInstructions() ?? "");
         for (const p of (await cliente.listPrompts()).prompts) saidas.push(JSON.stringify(await cliente.getPrompt({ name: p.name, arguments: {} })));
         if (cenario === "conectado com dados") {

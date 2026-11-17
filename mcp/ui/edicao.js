@@ -136,3 +136,68 @@ export function arquivoParaMostrar(sc) {
   const imagem = typeof a.imagem === "string" && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(a.imagem) ? a.imagem : undefined;
   return { nome: a.nome, tipo: typeof a.tipo === "string" ? a.tipo : "", tamanho: typeof a.tamanho === "string" ? a.tamanho : "", caminho: a.caminho, ...(imagem ? { imagem } : {}) };
 }
+
+// ---------- 0.17.0: cartão do wa_responder_lote ----------
+// O lote reaproveita o mecanismo do texto editável: o "texto" do pedido é a DECISÃO do dono, em JSON canônico
+// ({ enviar: [boolean por item], mensagens: [[texto, ...] por item] }). O código de confirmação fica preso a ele
+// (codigoEditado), então o modelo nunca consegue aprovar uma decisão que o dono não viu. Servidor e cartão usam
+// estas duas funções, para o JSON do cartão sem mudança ser idêntico ao da prévia.
+
+/** A decisão do lote como texto canônico. */
+export function serializarLote(enviar, mensagens) {
+  return JSON.stringify({ enviar, mensagens });
+}
+
+/** Lê o texto canônico. Devolve { enviar, mensagens } ou lança Error com a frase em português. */
+export function lerLote(texto) {
+  let o;
+  try {
+    o = JSON.parse(texto);
+  } catch {
+    throw new Error("A decisão do lote não é válida. Nada foi enviado.");
+  }
+  const ok =
+    o &&
+    typeof o === "object" &&
+    Array.isArray(o.enviar) &&
+    o.enviar.every((x) => typeof x === "boolean") &&
+    Array.isArray(o.mensagens) &&
+    o.mensagens.length === o.enviar.length &&
+    o.mensagens.every((m) => Array.isArray(m) && m.every((t) => typeof t === "string"));
+  if (!ok) throw new Error("A decisão do lote não é válida. Nada foi enviado.");
+  return { enviar: o.enviar, mensagens: o.mensagens };
+}
+
+/** Quantos itens estão marcados. */
+export function contarMarcados(enviar) {
+  return enviar.filter((x) => x === true).length;
+}
+
+/** Rótulo do botão de ação do lote, com N ao vivo. */
+export function rotuloDoBotaoDoLote(n) {
+  return "Enviar todas (" + n + ")";
+}
+
+/** Informações fixas de cada item do lote (alvo, destaque, o que a pessoa mandou por último): [{ alvo, destaque, nome, ultima, citada }]. */
+export function itensDoLoteParaMostrar(sc) {
+  const lote = sc && Array.isArray(sc.lote) ? sc.lote : [];
+  const t = sc && sc.conteudo_de_terceiros && Array.isArray(sc.conteudo_de_terceiros.lote) ? sc.conteudo_de_terceiros.lote : [];
+  return lote.map((l, i) => {
+    const x = (t[i] && typeof t[i] === "object" ? t[i] : {});
+    return {
+      alvo: l && typeof l.alvo === "string" ? l.alvo : "?",
+      destaque: l && typeof l.destaque === "string" ? l.destaque : "",
+      nome: typeof x.nome === "string" ? x.nome : "",
+      ultima: x.ultima && typeof x.ultima.texto === "string" ? { data: typeof x.ultima.data === "string" ? x.ultima.data : "", texto: x.ultima.texto } : null,
+      citada: typeof x.citada === "string" ? x.citada : "",
+    };
+  });
+}
+
+/** Resultado por item (depois do envio): [{ conversa, estado, texto }] a partir de `resultado.itens`. */
+export function resultadoDoLoteParaMostrar(resultado) {
+  const lista = resultado && Array.isArray(resultado.itens) ? resultado.itens : [];
+  return lista
+    .filter((i) => i && typeof i.conversa === "string")
+    .map((i) => ({ conversa: i.conversa, estado: typeof i.estado === "string" ? i.estado : "", texto: typeof i.frase === "string" ? i.frase : "" }));
+}

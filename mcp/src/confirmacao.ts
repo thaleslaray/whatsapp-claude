@@ -37,7 +37,7 @@ export const MAX_ERROS_DE_CODIGO = 3;
 export type CaminhoDeConfirmacao = "wa_confirmar_tela" | "wa_confirmar";
 
 /** Que cartão é: o cartão muda o desenho conforme o tipo. */
-export type TipoDoPedido = "responder" | "envio" | "desconectar" | "parear" | "listas" | "iniciar" | "editar" | "apagar" | "arquivo" | "modelo";
+export type TipoDoPedido = "responder" | "envio" | "desconectar" | "parear" | "listas" | "iniciar" | "editar" | "apagar" | "arquivo" | "modelo" | "responder_lote";
 
 /** O que o dono vê antes de clicar. Montada a partir do MESMO objeto que será executado. */
 export interface Previa {
@@ -63,6 +63,12 @@ export interface Previa {
    * sem links). É o arquivo do próprio dono, não texto de terceiros.
    */
   arquivo?: { nome: string; tipo: string; tamanho: string; caminho: string; imagem?: string };
+  /**
+   * 0.17.0 (wa_responder_lote): o que é fixo em cada item do lote, na ordem dos itens: o alvo (id público e número
+   * mascarado) e o destaque (grupo: quantos recebem). As mensagens de cada item e a marca "enviar este" estão em `texto`
+   * (a decisão do dono, em JSON: ver serializarLote em ui/edicao.js), que é o que o cartão edita.
+   */
+  lote?: Array<{ alvo: string; destaque?: string }>;
   /** Linhas extras: limite do dia, envio ligado etc. Avisos começam com "Aviso:". */
   detalhes?: string[];
   /** Avisos de risco, sempre à vista (pareamento). */
@@ -77,6 +83,8 @@ export interface Previa {
     citada?: string;
     /** Pedido de lista (wa_escolher_grupos, wa_bloquear_conversas): id público e nome de cada grupo ou contato. */
     itens?: Array<{ id: string; nome?: string }>;
+    /** 0.17.0: um por item do lote, na ordem: nome da conversa, a última mensagem recebida e a mensagem citada. */
+    lote?: Array<{ nome?: string; ultima?: { data: string; texto: string }; citada?: string }>;
   };
   /** Rótulo do botão de ação: "Enviar", "Ligar envio", "Entendo o risco, mostrar o QR"... */
   botao: string;

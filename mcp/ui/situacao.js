@@ -23,6 +23,7 @@ export function fraseDeFeito(tipo, resultado) {
   }
   if (tipo === "desconectar") return "O WhatsApp já foi desconectado deste computador.";
   if (tipo === "listas") return "A mudança na lista já foi feita.";
+  if (tipo === "responder_lote") return resultado && typeof resultado.frase === "string" ? resultado.frase : "Estas respostas já foram enviadas.";
   return "Esta resposta já foi enviada.";
 }
 
