@@ -60,7 +60,7 @@ describe("0.11.0: o mapa LID -> número aprende com os participantes dos grupos"
     assert.equal(s.chamadas.filter((x) => x.metodo === "groupFetchAllParticipating").length, 1);
   });
 
-  it("mensagem de grupo com participante em LID sem participantAlt sai com o número mascarado, sem buscar metadados de novo", async () => {
+  it("mensagem de grupo com participante em LID sem participantAlt sai com o número formatado, sem buscar metadados de novo", async () => {
     const { s, c, banco } = await cenario();
     s.mensagens([
       msg({ jid: GRUPO, id: "G1", participante: LID_ANA, nome: "Ana", texto: "oi", ts: t(1) }),
@@ -74,9 +74,9 @@ describe("0.11.0: o mapa LID -> número aprende com os participantes dos grupos"
     assert.equal(guardadas.find((x) => x.id === "G2")!.remetente!.numero, undefined);
     const r = await chamar(c, "wa_ler_conversa", { conversa: GRUPO });
     const [ana1, carla, ana2, beto] = remetentes(r);
-    assert.equal(ana1!.numero, "+55 11 9****-5678");
+    assert.equal(ana1!.numero, "+55 11 91234-5678");
     assert.equal(carla!.numero, "número oculto");
-    assert.equal(beto!.numero, "+55 21 9****-4321");
+    assert.equal(beto!.numero, "+55 21 98765-4321");
     // Rótulo estável: a mesma pessoa tem o mesmo; pessoas diferentes, rótulos diferentes (dá para contar 3 pessoas).
     for (const x of [ana1, carla, ana2, beto]) assert.match(String(x!.participante), /^p_[0-9a-f]{8}$/);
     assert.equal(ana1!.participante, ana2!.participante);
@@ -96,7 +96,7 @@ describe("0.11.0: o mapa LID -> número aprende com os participantes dos grupos"
     await assentar(m!);
     assert.equal(banco.numeroDoLid(LID_DUDA), pn(DUDA));
     const [pelaLid, peloNumero] = remetentes(await chamar(c, "wa_ler_conversa", { conversa: GRUPO }));
-    assert.equal(pelaLid!.numero, "+55 41 9****-5555");
+    assert.equal(pelaLid!.numero, "+55 41 96666-5555");
     assert.equal(pelaLid!.participante, peloNumero!.participante);
   });
 
@@ -108,7 +108,7 @@ describe("0.11.0: o mapa LID -> número aprende com os participantes dos grupos"
     await assentar(m!);
     assert.equal(banco.numeroDoLid(LID_DUDA), pn(DUDA));
     const [duda] = remetentes(await chamar(c, "wa_ler_conversa", { conversa: OUTRO_GRUPO }));
-    assert.equal(duda!.numero, "+55 41 9****-5555");
+    assert.equal(duda!.numero, "+55 41 96666-5555");
     assert.equal(s.chamadas.filter((x) => x.metodo === "groupFetchAllParticipating").length, 1);
   });
 
@@ -125,7 +125,7 @@ describe("0.11.0: o mapa LID -> número aprende com os participantes dos grupos"
     assert.notEqual(antes[0]!.participante, antes[1]!.participante, "sem o mapa, não dá para saber que é a mesma pessoa");
     banco.mapearLid(LID_CARLA, pn(CARLA));
     const depois = remetentes(await chamar(cliente, "wa_ler_conversa", { conversa: GRUPO }));
-    assert.equal(depois[0]!.numero, "+55 31 9****-6666");
+    assert.equal(depois[0]!.numero, "+55 31 97777-6666");
     assert.equal(depois[0]!.participante, depois[1]!.participante, "com o mapa, a mesma pessoa");
     // O rótulo é por conversa: a mesma pessoa em outro grupo tem outro rótulo.
     banco.permitirGrupo(OUTRO_GRUPO);
@@ -147,11 +147,11 @@ describe("0.11.0: o mapa LID -> número aprende com os participantes dos grupos"
     banco.mapearLid(LID_CARLA, pn(CARLA));
     const busca = await chamar(cliente, "wa_buscar", { texto: "bolo", agrupar: "mensagem" });
     const rb = ((busca.resultados as Obj[])[0]!.conteudo_de_terceiros as { remetente: Obj }).remetente;
-    assert.equal(rb.numero, "+55 31 9****-6666");
+    assert.equal(rb.numero, "+55 31 97777-6666");
     assert.match(String(rb.participante), /^p_[0-9a-f]{8}$/);
     const mem = await chamar(cliente, "wa_memoria", { conversa: GRUPO });
     const rm = ((mem.compromissos as Obj[])[0]!.conteudo_de_terceiros as { remetente: Obj }).remetente;
-    assert.equal(rm.numero, "+55 31 9****-6666");
+    assert.equal(rm.numero, "+55 31 97777-6666");
     assert.equal(rm.participante, rb.participante);
     for (const r of [busca, mem]) assert.ok(!JSON.stringify(r).includes(LID_CARLA.split("@")[0]!));
   });

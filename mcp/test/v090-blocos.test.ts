@@ -151,7 +151,7 @@ describe("0.9.0: wa_buscar junta por bloco", () => {
     assert.equal(pc[0]!.achados, 3, "a Ana tem três mensagens com pizza");
     assert.equal(pc[1]!.achados, 2);
     assert.match(String((pc[0]!.conversa as Obj).id), /^c_[0-9a-f]{12}$/);
-    assert.equal((pc[0]!.conversa as Obj).numero, "+55 11 9****-5678");
+    assert.equal((pc[0]!.conversa as Obj).numero, "+55 11 91234-5678");
     assert.ok(!JSON.stringify(pc).includes(ANA));
     const porBloco = (await buscar(c, { texto: "pizza" })).por_conversa as Obj[];
     assert.deepEqual(porBloco.map((x) => x.achados), [2, 1], "por bloco: o Beto tem dois blocos, a Ana um");

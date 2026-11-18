@@ -1,4 +1,4 @@
-// Identificadores do WhatsApp: o que é conversa individual, grupo, o que nunca se grava, e o número mascarado.
+// Identificadores do WhatsApp: o que é conversa individual, grupo, o que nunca se grava, e o número formatado (inteiro).
 
 import { jidNormalizedUser } from "@whiskeysockets/baileys";
 
@@ -37,14 +37,18 @@ export function jidDoNumero(texto: string): string | undefined {
   return /^\d{7,15}$/.test(digitos) ? `${digitos}@s.whatsapp.net` : undefined;
 }
 
-/** `+55 11 9****-1234`. EUA/Canadá: `+1 ****-1234`. Outros países: `+44 ****-1234`. Sem número: `número oculto`. */
-export function mascararNumero(digitos: string | undefined): string {
+/**
+ * O número INTEIRO formatado (desde 18/11/2026, a pedido do dono: antes saía com parte dos dígitos escondida).
+ * Brasil: `+55 11 99999-1234` (13 dígitos) ou `+55 11 9999-1234` (12). EUA/Canadá: `+1 415 555-1234`.
+ * Outros países: `+<todos os dígitos>`. Sem número ou inválido: `número oculto`.
+ */
+export function formatarNumero(digitos: string | undefined): string {
   if (!digitos || !/^\d{7,15}$/.test(digitos)) return "número oculto";
-  const fim = digitos.slice(-4);
   if (digitos.startsWith("55") && (digitos.length === 13 || digitos.length === 12)) {
     const ddd = digitos.slice(2, 4);
-    return digitos.length === 13 ? `+55 ${ddd} ${digitos[4]}****-${fim}` : `+55 ${ddd} ****-${fim}`;
+    const resto = digitos.slice(4);
+    return `+55 ${ddd} ${resto.slice(0, -4)}-${resto.slice(-4)}`;
   }
-  if (digitos.startsWith("1") && digitos.length === 11) return `+1 ****-${fim}`;
-  return `+${digitos.slice(0, 2)} ****-${fim}`;
+  if (digitos.startsWith("1") && digitos.length === 11) return `+1 ${digitos.slice(1, 4)} ${digitos.slice(4, 7)}-${digitos.slice(7)}`;
+  return `+${digitos}`;
 }

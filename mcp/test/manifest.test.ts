@@ -37,7 +37,7 @@ describe("mcpb/manifest.json", () => {
   });
 
   it("a versão é a mesma no manifest, no package.json (e no lock), no versao.ts e no rodapé do cartão", () => {
-    assert.equal(manifesto.version, "0.18.0");
+    assert.equal(manifesto.version, "0.19.0");
     assert.equal(pacote.version, manifesto.version);
     assert.equal(bloqueio.version, manifesto.version);
     assert.equal(bloqueio.packages[""].version, manifesto.version);

@@ -113,7 +113,7 @@ describe("texto editável no cartão", () => {
   });
 
   it("para quem, últimas recebidas, data curta e \"Ver detalhes\"", () => {
-    assert.equal(destinatario({ alvo: "+55 11 9****-5678 · c_1", conteudo_de_terceiros: { nome: "Ana" } }), "Ana (+55 11 9****-5678 · c_1)");
+    assert.equal(destinatario({ alvo: "+55 11 91234-5678 · c_1", conteudo_de_terceiros: { nome: "Ana" } }), "Ana (+55 11 91234-5678 · c_1)");
     assert.equal(destinatario({ alvo: "este Mac" }), "este Mac");
     assert.deepEqual(ultimasParaMostrar({ conteudo_de_terceiros: { ultimas_recebidas: [{ data: "x", texto: "a" }, { texto: 3 }] } }), [{ data: "x", texto: "a" }]);
     assert.match(dataCurta("2026-11-12T10:05:00.000Z"), /^\d{2}\/11 \d{2}:05$/);
@@ -179,7 +179,7 @@ describe("acompanhamento do QR no cartão", () => {
     assert.equal(rotuloDaContagem(40), "Este QR vale mais 40 s; depois aparece outro sozinho.");
     assert.equal(fraseDaEtapa(e), INSTRUCAO_DO_CELULAR);
     assert.match(INSTRUCAO_DO_CELULAR, /WhatsApp > Configurações > Aparelhos conectados > Conectar aparelho/);
-    assert.equal(fraseDaEtapa({ etapa: "conectado", matriz: null, segundos: 0, conectadoComo: "+55 11 9****-7777 (Dono)", mensagem: "" }), "Conectado como +55 11 9****-7777 (Dono).");
+    assert.equal(fraseDaEtapa({ etapa: "conectado", matriz: null, segundos: 0, conectadoComo: "+55 11 98888-7777 (Dono)", mensagem: "" }), "Conectado como +55 11 98888-7777 (Dono).");
     assert.ok(etapaFinal("conectado") && etapaFinal("expirado") && !etapaFinal("qr"));
   });
 

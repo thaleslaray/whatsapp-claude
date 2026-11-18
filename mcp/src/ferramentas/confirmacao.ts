@@ -26,7 +26,7 @@ import * as z from "zod/v4";
 import type { CaminhoDeConfirmacao } from "../confirmacao.ts";
 import type { Contexto } from "../contexto.ts";
 import { URI_TELA, URI_TELA_FIXA } from "../escrita.ts";
-import { mascararNumero } from "../jid.ts";
+import { formatarNumero } from "../jid.ts";
 import { ANOTACOES_LEITURA, registrarApoioDeConfirmacao, registrarComCartao, textoDoErro } from "../respostas.ts";
 import { limpar, limparProfundo } from "../segredos.ts";
 import { HTML_CONFIRMAR } from "../ui-gerada.ts";
@@ -269,7 +269,7 @@ export function registrarConfirmacao(server: McpServer, ctx: Contexto): void {
       case "desligado":
         return e.qr_lido ? s("conectando", "QR lido; conectando.") : s("gerando_qr", "Gerando o QR.");
       case "conectado": {
-        const como = `${e.numero ? mascararNumero(e.numero) : "número oculto"}${e.nome ? ` (${e.nome})` : ""}`;
+        const como = `${e.numero ? formatarNumero(e.numero) : "número oculto"}${e.nome ? ` (${e.nome})` : ""}`;
         return s("conectado", `Conectado como ${como}.`, { conectado_como: como });
       }
       case "expirado":

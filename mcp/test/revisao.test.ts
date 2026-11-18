@@ -666,12 +666,12 @@ describe("B17: apagar tudo leva os temporários; o registro não tem número nem
     assert.ok(existsSync(join(dados, "envios.enc")), "a contagem do dia fica");
   });
 
-  it("acoes.jsonl não leva número (nem mascarado) nem texto de mensagem", async () => {
+  it("acoes.jsonl não leva número nem texto de mensagem", async () => {
     const { c } = await cenarioDeResposta();
     const r = await clicar(c, await chamarCru(c, "wa_responder", { conversa: ANA, texto: "Texto secreto da resposta" }));
     assert.equal(r.isError, undefined, textoDe(r));
     const registro = readFileSync(m!.caminhoRegistro, "utf8");
-    assert.ok(!registro.includes("+55") && !registro.includes("****"), "sem número mascarado");
+    assert.ok(!registro.includes("+55") && !registro.includes("91234"), "sem número");
     assert.ok(!registro.includes(ANA.slice(-4)), "sem os 4 últimos dígitos");
     assert.ok(!registro.includes("Texto secreto") && !registro.includes("Que horas"), "sem conteúdo");
   });

@@ -124,8 +124,8 @@ describe("wa_parear", () => {
     await assentar(m!);
     const pronto = await estadoDoPareamento(c, previa);
     assert.equal(pronto.structuredContent!.etapa, "conectado");
-    assert.equal(pronto.structuredContent!.conectado_como, "+55 11 9****-7777 (Dono Teste)");
-    assert.match(textoDe(pronto), /^Conectado como \+55 11 9\*\*\*\*-7777/);
+    assert.equal(pronto.structuredContent!.conectado_como, "+55 11 98888-7777 (Dono Teste)");
+    assert.match(textoDe(pronto), /^Conectado como \+55 11 98888-7777/);
     relogio.avancar(PRAZO_DO_PAREAMENTO_MS);
     assert.equal(m!.ctx.transporte!.estado().situacao, "conectado", "o prazo de 5 min foi cancelado ao conectar");
     const { sessao } = await m!.ctx.nucleo();

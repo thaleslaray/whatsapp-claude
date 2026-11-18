@@ -11,7 +11,7 @@ import { dataIso } from "../apresentacao.ts";
 import { descricaoCurta, ErroDeBanco, type Banco, type EntradaIndice } from "../banco.ts";
 import type { Previa } from "../confirmacao.ts";
 import type { Contexto } from "../contexto.ts";
-import { ehGrupo, ehIndividual, mascararNumero } from "../jid.ts";
+import { ehGrupo, ehIndividual, formatarNumero } from "../jid.ts";
 import { marcaDoRascunho } from "../jeito.ts";
 import { registrarEscrita, respostaJson } from "../respostas.ts";
 import { aprenderComOEnvio, contarDesistencia } from "./jeito.ts";
@@ -40,7 +40,7 @@ export function validarTexto(texto: string): string {
 
 export function alvoDe(banco: Banco, e: EntradaIndice): string {
   if (e.grupo) return `grupo ${banco.idPublico(e.jid)}`;
-  return e.numero ? `${mascararNumero(e.numero)} · ${banco.idPublico(e.jid)}` : `conversa ${banco.idPublico(e.jid)}`;
+  return e.numero ? `${formatarNumero(e.numero)} · ${banco.idPublico(e.jid)}` : `conversa ${banco.idPublico(e.jid)}`;
 }
 
 /** Quem escreveu uma mensagem de grupo, para a chave dela (citar, reagir): o participante guardado ou o número. */
@@ -277,7 +277,7 @@ export function registrarEscritas(server: McpServer, ctx: Contexto): void {
           };
         },
         { limite: LIMITE_DO_TEXTO, unidade: "caracteres", comTexto: (novo) => ({ ...corpo, texto: validarTexto(novo) }) },
-        // O registro de ações fica mesmo depois do wa_desconectar: só o id público, nunca o número (nem mascarado).
+        // O registro de ações fica mesmo depois do wa_desconectar: só o id público, nunca o número.
         { registro: { conversa: idPublico, alvo: idPublico }, aoDesistir: contarDesistencia(banco) },
       );
     },

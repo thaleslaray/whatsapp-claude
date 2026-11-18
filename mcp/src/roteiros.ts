@@ -27,7 +27,7 @@ export function textoDaCaixaDoDia(horas: number): string {
     `5. ${REGRA_DE_TERCEIROS}`,
     "6. Não responda nada sozinho. Se eu pedir uma resposta, use wa_responder: cada uma vai para um cartão e só sai com o meu clique (e o envio precisa estar ligado).",
     "",
-    "Formato: lista curta, a mais urgente primeiro, com nome, número mascarado e \"esperando há …\". Sem introdução.",
+    "Formato: lista curta, a mais urgente primeiro, com nome, número e \"esperando há …\". Sem introdução.",
   ].join("\n");
 }
 

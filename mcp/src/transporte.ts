@@ -29,7 +29,7 @@ import makeWASocket, {
 import { PRIORIDADE, type Banco, type CacheDeGrupos, type ContatoParaAplicar, type MensagemGuardada, type ResultadoDoNome } from "./banco.ts";
 import { criarLoggerDaBiblioteca, type AvisoDaBiblioteca, type NivelDoAviso } from "./avisos-da-biblioteca.ts";
 import { alteracaoDaMensagem, autorDaMensagem, converterMensagem, dataDaMensagem } from "./conversao.ts";
-import { ehGrupo, ehIndividual, ehLid, ehSempreIgnorado, mascararNumero, normalizar, numeroDe } from "./jid.ts";
+import { ehGrupo, ehIndividual, ehLid, ehSempreIgnorado, formatarNumero, normalizar, numeroDe } from "./jid.ts";
 import type { MarcaDoRascunho } from "./jeito.ts";
 import { log } from "./log.ts";
 import { baixarCifrado, decifrarMidia, enderecoParaBaixar, ErroDeMidia, ESPERA_DO_REENVIO_MS, FIGURINHA_LADO, MAXIMO_DE_MIDIA_BYTES, tipoDaBaileys, type TipoDeEnvio } from "./midia.ts";
@@ -114,7 +114,7 @@ export interface EstadoDaConexao {
   pareando?: boolean;
   /** No pareamento: o celular já leu o QR e a conexão está terminando. */
   qr_lido?: boolean;
-  /** Dígitos do número do dono (mascarar antes de mostrar). */
+  /** Dígitos do número do dono (formatar antes de mostrar). */
   numero?: string;
   nome?: string;
   qr?: string;
@@ -716,7 +716,7 @@ export function criarTransporte(opcoes: OpcoesTransporte): Transporte {
     }
     const cache = banco.guardarGrupos(saida, relogio.agora());
     // 0.11.0: o mapa LID -> número aprende com os participantes dos grupos ESCOLHIDOS (os outros ficam só na memória, para
-    // o caso de o grupo ser escolhido depois): quem escreve em grupo só com o LID passa a aparecer com o número mascarado.
+    // o caso de o grupo ser escolhido depois): quem escreve em grupo só com o LID passa a aparecer com o número.
     // Pelo `mapearLids`, que respeita a lista "nunca ler" como o `mapearLid`.
     seguro("participantes dos grupos", () => {
       const pares: Array<{ lid: string; pn: string }> = [];
@@ -2076,5 +2076,5 @@ export function criarTransporte(opcoes: OpcoesTransporte): Transporte {
   };
 }
 
-/** Número mascarado do dono, para mostrar. */
-export const donoMascarado = (e: EstadoDaConexao): string | undefined => (e.numero ? mascararNumero(e.numero) : undefined);
+/** Número do dono formatado, para mostrar. */
+export const numeroDoDono = (e: EstadoDaConexao): string | undefined => (e.numero ? formatarNumero(e.numero) : undefined);

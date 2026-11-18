@@ -44,7 +44,7 @@ export interface Previa {
   tipo: TipoDoPedido;
   /** Ex.: "Responder no WhatsApp". */
   titulo: string;
-  /** Para quem (id público e número mascarado), ou "este computador". Nunca o nome do dono. */
+  /** Para quem (id público e número), ou "este computador". Nunca o nome do dono. */
   alvo: string;
   /** Texto inteiro que será enviado (nunca cortado). */
   texto?: string;
@@ -64,8 +64,8 @@ export interface Previa {
    */
   arquivo?: { nome: string; tipo: string; tamanho: string; caminho: string; imagem?: string };
   /**
-   * 0.17.0 (wa_responder_lote): o que é fixo em cada item do lote, na ordem dos itens: o alvo (id público e número
-   * mascarado) e o destaque (grupo: quantos recebem). As mensagens de cada item e a marca "enviar este" estão em `texto`
+   * 0.17.0 (wa_responder_lote): o que é fixo em cada item do lote, na ordem dos itens: o alvo (id público e número)
+   * e o destaque (grupo: quantos recebem). As mensagens de cada item e a marca "enviar este" estão em `texto`
    * (a decisão do dono, em JSON: ver serializarLote em ui/edicao.js), que é o que o cartão edita.
    */
   lote?: Array<{ alvo: string; destaque?: string }>;
@@ -396,7 +396,7 @@ export class Pedidos {
 
   /**
    * Registro sem texto de mensagem nenhuma: só o tamanho da resposta e se foi editada. O `alvo` da prévia pode ter o
-   * número mascarado: quem cria o pedido o troca pelo id público em `opcoes.registro.alvo` (o registro sobrevive ao
+   * número: quem cria o pedido o troca pelo id público em `opcoes.registro.alvo` (o registro sobrevive ao
    * wa_desconectar).
    */
   #registrar(pedido: Pedido, evento: string, caminho: CaminhoDeConfirmacao | null, extra: Record<string, unknown>): void {

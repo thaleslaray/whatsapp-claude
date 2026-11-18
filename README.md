@@ -207,7 +207,7 @@ Para ver mensagens mais antigas que as guardadas, peça "busca mensagens mais an
 - **Quem espera resposta:** a lista de conversas diz quais terminam em mensagem de outra pessoa e dá uma pista quando ela parece só ter fechado o assunto ("valeu", figurinha, emoji). É pista, não certeza.
 - **Memória:** só se você pedir. O programa só grava um compromisso se a frase está mesmo na mensagem citada. Bloquear a conversa, tirar o grupo ou desconectar apagam a memória junto.
 - **Seu jeito:** o programa mede sozinho como você escreve (tamanho, minúsculas, pontuação, emoji, como abre e fecha), só nas suas mensagens, e entrega ao Claude exemplos reais seus na hora de redigir. Ele também guarda o que você muda nos cartões; quando o mesmo ajuste aparece duas vezes, o Claude propõe uma regra e pergunta se pode adotar. "O que você aprendeu comigo?" mostra tudo; "para de aprender" desliga; "esquece o que aprendeu" apaga.
-- **Em grupo**, quem escreveu aparece com o número mascarado quando o programa o conhece, e sempre com um rótulo estável (`p_...`), para dar para contar pessoas sem ver o número de ninguém.
+- **Em grupo**, quem escreveu aparece com o número inteiro quando o programa o conhece, e sempre com um rótulo estável (`p_...`), para dar para contar pessoas mesmo sem o número. O número é dado pessoal de terceiros: o Claude só repete ou passa adiante quando você pede.
 
 ## Segurança
 

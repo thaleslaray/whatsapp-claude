@@ -23,7 +23,7 @@ O Claude lê as **conversas individuais** do WhatsApp do dono (menos as da lista
   - `wa_listar_grupos` usa `groupFetchAllParticipating()` (só metadados: nome e número de participantes; nenhuma mensagem é decifrada). Cache de 1 h no `grupos.enc` cifrado.
   - `wa_escolher_grupos` com `adicionar` e/ou `remover` (id ou nome exato). Remover age direto e apaga as mensagens do grupo; adicionar passa pelo cartão com clique (desde a 0.4.0). Tudo grava no registro.
   - As mensagens de grupo são gravadas a partir da escolha. O histórico do pareamento só entra para os grupos que já estavam na lista naquele momento. Nunca usar `fetchMessageHistory` (revogado na 0.7.0: só pelo `wa_buscar_historico`, ver a seção da 0.7.0).
-  - Cada mensagem de grupo leva o remetente (pushName e número mascarado) em `conteudo_de_terceiros`.
+  - Cada mensagem de grupo leva o remetente (pushName e número; até a 0.18.0, mascarado) em `conteudo_de_terceiros`.
   - `wa_listar_conversas` e `wa_ler_conversa` incluem os grupos permitidos, com `grupo: true`.
   - **Enviar para grupo é proibido.** (Revogado em 13/11/2026, 0.7.0: pode, só para grupo escolhido, com cartão.)
 - **Nunca marcar como lida.** Nada de `readMessages`, recibo de leitura ou presença `available`. Há teste que garante.
@@ -83,7 +83,7 @@ O Claude lê as **conversas individuais** do WhatsApp do dono (menos as da lista
 | Ferramenta | Tipo | O que faz |
 |---|---|---|
 | `wa_estado` | leitura | Conectado ou não, número e nome do dono, se é o dono da conexão ou leitor, quantas conversas guardadas, última mensagem recebida (data), versão |
-| `wa_listar_conversas` | leitura | Conversas individuais e grupos escolhidos (`grupo: true`), da mais recente para a mais antiga: id público, nome, número mascarado (`+55 11 9****-1234`), última mensagem (até 200 caracteres), não lidas. Filtro opcional por nome. Paginação |
+| `wa_listar_conversas` | leitura | Conversas individuais e grupos escolhidos (`grupo: true`), da mais recente para a mais antiga: id público, nome, número inteiro formatado (`+55 11 91234-5678`; até a 18/11/2026 saía mascarado), última mensagem (até 200 caracteres), não lidas. Filtro opcional por nome. Paginação |
 | `wa_ler_conversa` | leitura | Mensagens de uma conversa (por id público, número, jid ou pelo nome, se o nome for único), com `de_mim`, data, texto, tipo de mídia e a mensagem citada. Padrão de 30 mensagens, máximo de 100 |
 | `wa_buscar` | leitura | Busca texto nas mensagens guardadas. Devolve conversa, data e trecho |
 | `wa_listar_grupos` | leitura | Grupos do dono (só metadados, cache de 1 h), com `escolhido` |
@@ -143,7 +143,7 @@ Ninguém pareia número nem conecta no WhatsApp de verdade durante as fases. **O
 
 ## Desvios da Fase 1 (12/11/2026)
 
-- **O modelo nunca vê o jid.** Cada conversa tem um id público (`c_...`/`g_...`, HMAC do jid com a chave da instalação). O jid tem o número inteiro, e a ficha pede número mascarado. As ferramentas ainda ACEITAM jid ou número digitado na entrada.
+- **O modelo nunca vê o jid.** Cada conversa tem um id público (`c_...`/`g_...`, HMAC do jid com a chave da instalação). O jid tem o número inteiro; desde 18/11/2026, a pedido do dono, o número sai inteiro formatado (antes saía mascarado), mas o jid continua sem sair. As ferramentas ainda ACEITAM jid ou número digitado na entrada.
 - **Contato bloqueado pelo número que escreve por um LID ainda desconhecido:** a Baileys chama `shouldIgnoreJid` com o LID, e o mapa LID -> número só existe depois de visto (`remoteJidAlt`, `lid-mapping.update`, histórico, contatos ou `getLIDForPN` no bloqueio). Nesse caso raro a mensagem pode ser decifrada (na memória). **Corrigido na 0.4.0** (até a 0.3.0 ela era gravada sob o LID, então "nunca gravado" não era exato): antes de gravar mensagem de um LID sem número conhecido, o transporte pede o número à Baileys (`signalRepository.lidMapping.getPNForLID`); se é de alguém da lista, nada é gravado e o LID entra na lista; se a Baileys também não sabe e há bloqueio por número sem LID conhecido, a mensagem é descartada e só a contagem vai para o stderr. Garantido: nunca gravado; "nunca decifrado" vale para as formas conhecidas (número e LID já mapeados).
 - **Não lidas:** contadas aqui (mensagem nova soma; mensagem do dono vinda do celular zera; `unreadCount` do histórico vale; `chats.update` com 0 zera). Ler pelo Claude não muda nada, nem aqui nem no WhatsApp.
 - **Reações e enquetes respondidas** ficam de fora na v1 (só a criação da enquete é guardada como `[enquete]`). Edições e apagamentos para todos mudam a mensagem guardada desde a 0.4.0.
@@ -225,7 +225,7 @@ Correções de uma revisão independente. Cada uma tem teste em `mcp/test/revisa
 - **B14.** As frases que mandavam "parear de novo" com a sessão ainda salva (quando o `wa_parear` recusaria) dizem "use wa_desconectar e depois wa_parear". Escolhido por ser o mais simples: o `wa_parear` continua recusando sessão salva.
 - **B15.** As instruções do servidor dizem o que é recusado antes de decifrar (grupos fora da lista, status, canais, listas de transmissão e a lista "nunca ler" pelas formas conhecidas) e o que é decifrado mas descartado sem gravar.
 - **B16.** O nome do contato e o assunto do grupo vão em `conteudo_de_terceiros.nome` em todas as saídas (listar conversas, ler conversa, buscar, listar grupos, listas). Por simplicidade, também o nome que o dono salvou na agenda (não dá para separar de forma confiável na saída): tratar como dado não custa nada.
-- **B17.** `apagarTudo` leva também os `*.tmp` de gravação interrompida. Ficam o `envios.enc` (limite do dia) e o `acoes.jsonl` (registro). O registro de uma resposta guardava o alvo da prévia, com o número mascarado (`+55 11 9****-1234`); agora guarda só o id público.
+- **B17.** `apagarTudo` leva também os `*.tmp` de gravação interrompida. Ficam o `envios.enc` (limite do dia) e o `acoes.jsonl` (registro). O registro de uma resposta guardava o alvo da prévia, com o número inteiro formatado (`+55 11 91234-5678`; até a 18/11/2026 saía mascarado); agora guarda só o id público.
 - **B18.** `baixavel` só é true com `url` ou `directPath`. `unhandledRejection` e `uncaughtException` viram uma linha limpa no stderr sem derrubar o processo; na partida, o processo sai.
 - **B19. Sem mudança.** O manifest já estava em `"0.4"` (desde a Fase 3) e o `mcpb validate` aceita. O MCP do Instagram está em `"0.3"`, não `"0.4"`: o pedido de "alinhar para 0.4 como o Instagram" tinha as duas coisas trocadas; ficou `0.4`, o valor pedido.
 - Versão 0.4.0 (cartão em `ui://whatsapp/confirmar-v0-4-0.html`, mais o apelido fixo).
@@ -719,3 +719,19 @@ Revisão independente, sem achado crítico ou alto. Testes em `mcp/test/v0160-*.
 **Desvios.** `scripts/autoteste.mjs` não listava o `wa_responder_lote` (entrou na 0.17.0 sem o autoteste rodar): a lista ganhou a ferramenta e o autoteste voltou a passar. `INSTALL.md` já aponta para `v0.18.0`, como na 0.17.1: só funciona depois de a release ser publicada.
 
 **Não provado:** nada saiu pelo WhatsApp real. Só um envio de verdade prova que chega como figurinha no celular (e que o WhatsApp aceita a figurinha sem `pngThumbnail`, sem `firstFrameLength`/`firstFrameSidecar` na animada e sem metadados de pacote no EXIF). O desenho do cartão com a figurinha no Claude Desktop também não foi visto.
+
+## 0.19.0: número inteiro para o modelo
+
+- A pedido do dono, em 18/11/2026 (precisou passar o contato de um aluno ao time comercial e a IA só via o número mascarado, no formato `+55 11 9****-1234`): o telefone deixa de sair mascarado. `mascararNumero` virou `formatarNumero` (`src/jid.ts`): Brasil `+55 11 99999-1234` (13 dígitos) ou `+55 11 9999-1234` (12), EUA/Canadá `+1 415 555-1234`, outros `+<dígitos>`, sem número `número oculto`.
+- Vale para tudo o que o modelo lê: conversas, remetentes de grupo, lista de bloqueio, número do dono no `wa_estado`, alvo do cartão. O trecho da pergunta no `wa_como_eu_respondi` sai como chegou (`mascararTelefones` removida).
+- Campo `nome_e_numero_mascarado` virou `nome_e_numero`; `donoMascarado` virou `numeroDoDono`.
+- **Instrução nova ao modelo** (`src/servidor.ts`): os números aparecem inteiros; são dado pessoal de terceiros, então só repetir ou passar adiante quando o dono pedir.
+- **Não mudou:** o registro de ações continua só com o id público, sem número; o LID continua sem sair; a limpeza de segredos (`src/segredos.ts`) continua trocando jid por `‹jid›` em erro, log e prévia; `wa_exemplos_do_meu_jeito` continua descartando rajada com telefone.
+- Testes: `mcp/test/formatar-numero.test.ts` (novo) e expectativas trocadas em 12 arquivos; o teste do `v0130-como-eu-respondi` que provava que o telefone não aparecia no trecho foi invertido.
+- Texto: README, `skill/rotinas-whatsapp` (SKILL.md, `limites.md`, `pendencias.md`).
+
+**Desvios.** O pacote `skill/rotinas-whatsapp.skill` não foi refeito.
+
+**INSTALL sem versão presa (18/11/2026, a pedido do dono).** `INSTALL.md` deixou de citar a versão: os três downloads (`whatsapp-pessoal.mcpb`, o `.sha256` e `rotinas-whatsapp.skill`) vêm de `releases/latest/download/`, e os links para o README apontam para a `main`. Não precisa mais mexer no guia a cada versão; em troca, o guia instala o que estiver publicado como última release, não uma versão fixa.
+
+**Não provado:** a leitura com número inteiro foi conferida com dados reais pelo `scripts/chamar.mjs` (cópia leitora) em uma conversa; os cartões da versão instalada com número inteiro só depois de instalar.

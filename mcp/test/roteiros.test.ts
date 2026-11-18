@@ -60,12 +60,12 @@ describe("roteiros prontos", () => {
     const { cliente, fechar } = await conectarCliente(m.ctx);
     fecharCliente = fechar;
     const todas = (await chamar(cliente, "wa_listar_conversas")).conversas as Obj[];
-    const ana = todas.find((c) => c.numero === "+55 11 9****-5678")!;
+    const ana = todas.find((c) => c.numero === "+55 11 91234-5678")!;
     assert.equal(ana.esperando_resposta_desde, new Date(Math.floor((agora - 3 * 3600_000) / 1000) * 1000).toISOString());
-    const beto = todas.find((c) => c.numero === "+55 21 9****-4321")!;
+    const beto = todas.find((c) => c.numero === "+55 21 98765-4321")!;
     assert.equal(beto.esperando_resposta_desde, undefined, "a última é minha: ninguém espera");
     const recentes = (await chamar(cliente, "wa_listar_conversas", { desde_horas: 24 })).conversas as Obj[];
-    assert.deepEqual(recentes.map((c) => c.numero), ["+55 11 9****-5678"]);
+    assert.deepEqual(recentes.map((c) => c.numero), ["+55 11 91234-5678"]);
   });
 
   it("marca do resumo: só as novas desde a marca; wa_marcar_resumo guarda; tirar o grupo apaga a marca", async () => {

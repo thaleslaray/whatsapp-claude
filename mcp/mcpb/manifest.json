@@ -3,13 +3,26 @@
   "name": "whatsapp-pessoal",
   "display_name": "WhatsApp pessoal",
   "icon": "icon.png",
-  "version": "0.18.0",
-  "description": "Cliente não oficial, para uso pessoal: o Claude lê as suas conversas e os grupos que você escolher no WhatsApp, e só escreve depois do seu clique.",
-  "long_description": "Projeto pessoal, sem relação com o WhatsApp ou a Meta. Conecta como aparelho vinculado (biblioteca Baileys), o que viola os termos do WhatsApp e pode levar a restrição ou banimento do número; começar conversa com quem não tem o seu número é o que mais leva a banimento. Depois de instalar, peça ao Claude \"parear o WhatsApp\" e leia o QR que aparece na conversa. Lê as conversas individuais (menos as da lista \"nunca ler\") e só os grupos que você escolher; pede ao celular mensagens mais antigas quando você quiser. Abre fotos, áudios, vídeos e documentos recebidos quando você pedir: eles ficam em Downloads/WhatsApp Claude, sem cifra. Transcreve áudios neste computador quando você pedir (o modelo de transcrição, 190 MB, é baixado uma vez, depois do seu clique). Responde conversas e grupos escolhidos, envia arquivos e figurinhas deste computador, começa conversa com um número novo, edita (até 15 min) e apaga para todos (até 48 h) as suas mensagens: tudo isso só depois do seu clique no cartão, com o envio ligado e até o limite do dia. Reagir com emoji é direto, com teto diário. Nunca marca como lida, nunca aparece online e não manda prévia de link. A conexão só fica ligada com o Claude Desktop aberto; tudo é guardado cifrado neste computador, com a chave no cofre do sistema. Funciona no Mac e no Windows.",
+  "version": "0.19.0",
+  "description": "O Claude lê o seu WhatsApp pessoal, mostra quem está esperando resposta e deixa a resposta pronta. Nada sai sem o seu clique. Cliente não oficial.",
+  "long_description": "**O Claude lê o seu WhatsApp e deixa as respostas prontas. Você só clica em enviar.**\nPeça do jeito que você fala: \"quem está esperando resposta minha?\", \"o que rolou no grupo dos alunos hoje?\", \"responde a Ana que eu chego às 8\".\n\n**O que ele faz**\n• Lê as suas conversas e só os grupos que você escolher.\n• Acha qualquer assunto, inclusive dentro de áudio. A transcrição roda neste computador (o modelo, de 190 MB, é baixado uma vez, depois do seu clique).\n• Abre fotos, áudios, vídeos e documentos quando você pede. Eles ficam em Downloads/WhatsApp Claude, sem cifra.\n• Responde nas conversas e nos grupos escolhidos, envia arquivo e figurinha, começa conversa com um número novo, edita (até 15 min) e apaga para todos (até 48 h) as suas mensagens.\n• Pede ao celular mensagens mais antigas quando você quiser.\n\n**Você no controle**\n• Nada é enviado sem o seu clique. Cada mensagem aparece num cartão, e você pode mudar o texto antes de mandar. A única exceção é reagir com emoji, que sai direto, com teto por dia.\n• O envio começa desligado e tem limite diário.\n• A lista \"nunca ler\" tira uma conversa do alcance do Claude.\n• Nunca marca mensagem como lida, nunca aparece online e não manda prévia de link.\n• Tudo fica guardado cifrado neste computador, com a chave no cofre do sistema. O que o Claude lê entra na conversa com ele.\n• A conexão só fica ligada com o Claude Desktop aberto.\n\n**O risco, antes de instalar**\nProjeto pessoal, sem relação com o WhatsApp ou a Meta. Ele conecta como aparelho vinculado, do jeito que o WhatsApp Web faz, por uma biblioteca não oficial (Baileys). Isso viola os termos do WhatsApp e pode levar a restrição ou banimento do número. O que mais leva a banimento é começar conversa com quem não tem o seu número.\n\n**Para começar**\nDepois de instalar, peça ao Claude \"parear o WhatsApp\" e leia com o celular o QR que aparece na conversa.\n\nFunciona no Mac e no Windows.",
   "author": {
     "name": "Thales Laray",
     "url": "https://thaleslaray.com.br"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thaleslaray/whatsapp-claude.git"
+  },
+  "homepage": "https://github.com/thaleslaray/whatsapp-claude",
+  "support": "https://github.com/thaleslaray/whatsapp-claude/issues",
+  "keywords": [
+    "whatsapp",
+    "mensagens",
+    "grupos",
+    "atendimento",
+    "transcricao"
+  ],
   "server": {
     "type": "node",
     "entry_point": "server/index.mjs",

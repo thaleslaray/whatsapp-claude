@@ -55,7 +55,7 @@ Período: últimas N horas. Conversas lidas: N.
 (inclua pedidos sem resposta a mais de 72 h que apareceram de passagem: cite, não os trate)
 ```
 
-Na coluna "Quem", use o nome como aparece; sem nome, o número mascarado que a ferramenta devolve. Dois contatos podem ter o mesmo nome mascarado: diferencie pelo campo `numero`. Não tente descobrir o número inteiro.
+Na coluna "Quem", use o nome como aparece; sem nome, o número que a ferramenta devolve. Dois contatos podem ter o mesmo nome mascarado: diferencie pelo campo `numero`.
 
 ## Depois do relatório
 

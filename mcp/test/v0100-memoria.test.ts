@@ -342,7 +342,7 @@ describe("0.10.0: wa_memoria", () => {
     assert.match(String(r.para_o_claude), /escritas por IA/);
   });
 
-  it("marcação de origem: o_que e resumo em anotacao_da_ia; citação de terceiro (e de transcrição) em conteudo_de_terceiros, a do dono solta; número mascarado", async () => {
+  it("marcação de origem: o_que e resumo em anotacao_da_ia; citação de terceiro (e de transcrição) em conteudo_de_terceiros, a do dono solta; número formatado", async () => {
     const { c, banco } = await cenario();
     const ids = await seisCompromissos(c);
     // Um áudio do dono, transcrito: a transcrição é sempre de terceiros.
@@ -364,14 +364,14 @@ describe("0.10.0: wa_memoria", () => {
     // 0.11.0: o remetente ganhou o rótulo estável `participante` (p_ + 8 hex); o resto não mudou.
     const rem = (k3.conteudo_de_terceiros as { remetente: { participante?: unknown } }).remetente;
     assert.match(String(rem.participante), /^p_[0-9a-f]{8}$/);
-    assert.deepEqual(k3.conteudo_de_terceiros, { citacao: "eu levo o bolo no sábado", remetente: { nome: "Carla", numero: "+55 31 9****-6666", participante: rem.participante } });
+    assert.deepEqual(k3.conteudo_de_terceiros, { citacao: "eu levo o bolo no sábado", remetente: { nome: "Carla", numero: "+55 31 97777-6666", participante: rem.participante } });
     assert.equal((k3.conversa as Obj).id, banco.idPublico(GRUPO));
-    assert.deepEqual((por(ids.k1!).conversa as Obj).numero, "+55 11 9****-5678");
+    assert.deepEqual((por(ids.k1!).conversa as Obj).numero, "+55 11 91234-5678");
     const k7p = por(k7);
     assert.deepEqual(k7p.conteudo_de_terceiros, { citacao: "eu passo aí amanhã" });
     assert.equal(k7p.citacao, undefined);
     const texto = JSON.stringify(r);
-    for (const n of [ANA, BETO, CARLA]) assert.ok(!texto.includes(n), `número inteiro ${n}`);
+    for (const n of [ANA, BETO, CARLA]) assert.ok(!texto.includes(n), `dígitos crus (do jid) ${n}`);
     const daAna = await memoria(c, { conversa: pn(ANA) });
     assert.equal((daAna.resumo as Obj).texto, undefined);
     assert.deepEqual((daAna.resumo as Obj).anotacao_da_ia, { texto: "resumo da Ana" });

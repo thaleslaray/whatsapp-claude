@@ -1,4 +1,4 @@
-// Ferramentas pelo cliente MCP em memória: structuredContent enxuto, número mascarado, id público,
+// Ferramentas pelo cliente MCP em memória: structuredContent enxuto, número inteiro formatado, id público,
 // conteudo_de_terceiros, listas que apagam e registro de ações.
 
 import assert from "node:assert/strict";
@@ -79,12 +79,12 @@ describe("ferramentas", () => {
     assert.match(String(l.para_o_claude), /ainda não foi pareado/);
   });
 
-  it("wa_estado conectado: número do dono mascarado, contagens e versão", async () => {
+  it("wa_estado conectado: número do dono formatado, contagens e versão", async () => {
     await cenario();
     const e = await comCliente((c) => chamar(c, "wa_estado"));
     assert.equal(e.situacao, "conectado");
     assert.equal(e.conectado, true);
-    assert.deepEqual(e.dono, { numero: "+55 11 9****-7777", nome: "Dono Teste" });
+    assert.deepEqual(e.dono, { numero: "+55 11 98888-7777", nome: "Dono Teste" });
     assert.equal(e.conversas_guardadas, 2);
     assert.equal(e.grupos_guardados, 1);
     assert.equal(e.grupos_escolhidos, 1);
@@ -92,7 +92,7 @@ describe("ferramentas", () => {
     assert.ok(!JSON.stringify(e).includes(DONO));
   });
 
-  it("wa_listar_conversas: ids públicos, números mascarados, grupo: true e texto de terceiros separado", async () => {
+  it("wa_listar_conversas: ids públicos, números inteiros formatados, grupo: true e texto de terceiros separado", async () => {
     await cenario();
     await comCliente((c) => chamar(c, "wa_listar_grupos")); // o nome do grupo vem dos metadados
     const r = await comCliente((c) => chamar(c, "wa_listar_conversas"));
@@ -103,7 +103,7 @@ describe("ferramentas", () => {
     const ana = conversas.find((c) => nomeDe(c) === "Ana Paula")!;
     assert.equal(ana.nome, undefined, "o nome nunca fica no nível de cima");
     assert.match(String(ana.id), /^c_[0-9a-f]{12}$/);
-    assert.equal(ana.numero, "+55 11 9****-5678");
+    assert.equal(ana.numero, "+55 11 91234-5678");
     assert.equal(ana.grupo, false);
     assert.equal(ana.nao_lidas, 1);
     assert.deepEqual((ana.ultima as Obj).conteudo_de_terceiros, { texto: "[nota de voz]" });
@@ -148,7 +148,7 @@ describe("ferramentas", () => {
       // 0.11.0: o remetente ganhou o rótulo estável `participante` (p_ + 8 hex); o resto não mudou.
       const rem = (g.conteudo_de_terceiros as { remetente: { participante?: unknown } }).remetente;
       assert.match(String(rem.participante), /^p_[0-9a-f]{8}$/);
-      assert.deepEqual(g.conteudo_de_terceiros, { texto: "almoço de domingo?", remetente: { nome: "Beto", numero: "+55 21 9****-4321", participante: rem.participante } });
+      assert.deepEqual(g.conteudo_de_terceiros, { texto: "almoço de domingo?", remetente: { nome: "Beto", numero: "+55 21 98765-4321", participante: rem.participante } });
       assert.equal((grupo.conversa as Obj).grupo, true);
 
       const pag = await chamar(c, "wa_ler_conversa", { conversa: idAna, limite: 2 });
@@ -235,7 +235,7 @@ describe("ferramentas", () => {
       await chamar(c, "wa_listar_grupos");
       const r = await chamar(c, "wa_bloquear_conversas", { bloquear: ["Ana Paula", "Família", "Fulano"] });
       const b = (r.bloqueadas as Obj[])[0]!;
-      assert.equal(b.numero, "+55 11 9****-5678");
+      assert.equal(b.numero, "+55 11 91234-5678");
       assert.equal(b.mensagens_apagadas, 3);
       assert.deepEqual((r.nao_achadas as Obj[]).map((x) => x.motivo), ["é um grupo: use wa_escolher_grupos", "nenhuma conversa ou contato com esse nome exato"]);
       assert.equal((r.lista_nunca_ler as Obj[]).length, 1);

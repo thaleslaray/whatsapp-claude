@@ -1,7 +1,7 @@
 // 0.13.0: wa_como_eu_respondi (Parte B) contra o banco de verdade (pasta temporária, sem rede, relógio fixo): acha por
 // palavras parecidas, ordem forte antes de fraca, filtros (conversa, tipo, so_grupos, limite), exclusão do rascunho da
-// IA e a opção de incluir (marcado), marcação de terceiros (pergunta em conteudo_de_terceiros, telefone mascarado,
-// remetente com participante e número mascarado), resposta do dono com link e valor, aviso de resposta velha, a
+// IA e a opção de incluir (marcado), marcação de terceiros (pergunta em conteudo_de_terceiros, telefone como
+// chegou, remetente com participante e número inteiro), resposta do dono com link e valor, aviso de resposta velha, a
 // varredura (sem node:sqlite), o desligado e as contagens de pares no wa_meu_jeito.
 
 import assert from "node:assert/strict";
@@ -85,13 +85,13 @@ describe("0.13.0: wa_como_eu_respondi", () => {
     assert.equal(terceiros.trecho, "Qual o prazo para entregar o trabalho final da turma");
     const remetente = terceiros.remetente as Obj;
     assert.match(String(remetente.participante), /^p_[0-9a-f]{8}$/);
-    assert.match(String(remetente.numero), /\*\*\*\*/);
+    assert.equal(remetente.numero, "+55 21 98765-4321");
     assert.equal(citada.pergunta.texto, undefined, "o texto da pergunta só em conteudo_de_terceiros");
-    // Telefone de terceiro dentro da pergunta: mascarado.
+    // Telefone de terceiro dentro da pergunta: sai como chegou (a regra mudou em 18/11/2026 a pedido do dono; antes saía mascarado).
     const tel = itens.find((x) => perguntaDe(x) === "Q-TEL")!;
-    assert.match(String((tel.pergunta.conteudo_de_terceiros as Obj).trecho), /\*\*\*\*-7777/);
+    assert.ok(String((tel.pergunta.conteudo_de_terceiros as Obj).trecho).includes(TELEFONE_DO_ALUNO));
     const visivel = JSON.stringify(r);
-    for (const proibido of ["98888", BETO, ANA, "@s.whatsapp.net", "@lid"]) assert.ok(!visivel.includes(proibido), proibido);
+    for (const proibido of [BETO, ANA, "@s.whatsapp.net", "@lid"]) assert.ok(!visivel.includes(proibido), proibido);
     // Velha (respondida há 99 dias e pouco): aviso e a orientação de perguntar ao dono.
     assert.equal(itens.find((x) => perguntaDe(x) === "Q-ANA")!.ha_dias, 99);
     assert.match(String(r.aviso), /mais de 60 dias/);

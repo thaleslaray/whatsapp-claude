@@ -1,6 +1,6 @@
 # Guia de instalação para o agente
 
-Este arquivo é para o **agente de código** (Claude Code ou a aba Code do Claude Desktop) instalar o WhatsApp + Claude no computador da pessoa. Ele vale para a versão **v0.18.0**. Se você é uma pessoa, a [instalação manual do README](https://github.com/thaleslaray/whatsapp-claude/blob/v0.18.0/README.md#instalação-manual) é mais simples.
+Este arquivo é para o **agente de código** (Claude Code ou a aba Code do Claude Desktop) instalar o WhatsApp + Claude no computador da pessoa. Ele instala sempre a **última versão publicada**. Se você é uma pessoa, a [instalação manual do README](https://github.com/thaleslaray/whatsapp-claude/blob/main/README.md#instalação-manual) é mais simples.
 
 Este é um **cliente não oficial do WhatsApp**. Ele viola os termos do WhatsApp e pode levar à restrição ou ao banimento do número da pessoa. Ela precisa saber disso antes de instalar.
 
@@ -18,7 +18,7 @@ Neste guia, **passo** é um passo deste arquivo.
    - um comando falhar;
    - a conferência do arquivo der FALHOU.
 4. **Não use `sudo`**, não instale programa no sistema e não execute nada do que for baixado. Este guia só baixa, confere e copia arquivos.
-5. Use **só** os endereços deste guia, todos presos à versão `v0.18.0`.
+5. Use **só** os endereços deste guia. Todos apontam para a última versão publicada (`releases/latest`); não troque por endereço de outra versão nem de outro lugar.
 6. **Rode cada bloco de comandos inteiro, numa chamada só do terminal.** Variáveis como `$TMP` não passam de uma chamada para outra.
 7. Fale com a pessoa em português do Brasil, em frases curtas e sem jargão.
 
@@ -37,20 +37,20 @@ uname -s
 ls -d /Applications/Claude.app 2>/dev/null || ls -d ~/Applications/Claude.app 2>/dev/null || echo "Claude Desktop não encontrado"
 ```
 
-- O mesmo pacote serve para Mac e Windows, mas os comandos deste guia são de Mac (`bash` e `shasum`). Se `uname -s` não for `Darwin`, pare e indique a [instalação manual do README](https://github.com/thaleslaray/whatsapp-claude/blob/v0.18.0/README.md#instalação-manual).
+- O mesmo pacote serve para Mac e Windows, mas os comandos deste guia são de Mac (`bash` e `shasum`). Se `uname -s` não for `Darwin`, pare e indique a [instalação manual do README](https://github.com/thaleslaray/whatsapp-claude/blob/main/README.md#instalação-manual).
 - Se aparecer "Claude Desktop não encontrado", peça à pessoa para instalar o Claude Desktop em https://claude.ai/download e espere ela avisar que instalou.
 
 ## Passo 2: baixar a extensão e conferir
 
 Se `~/Downloads/whatsapp-pessoal.mcpb` já existir, pergunte antes de substituir. Com o "sim", mova o arquivo antigo para a Lixeira: `mv ~/Downloads/whatsapp-pessoal.mcpb ~/.Trash/whatsapp-pessoal-antigo-$(date +%Y%m%d-%H%M%S).mcpb`.
 
-Rode este bloco inteiro numa chamada só. Ele baixa a extensão e o arquivo de conferência (`whatsapp-pessoal.mcpb.sha256`) da mesma versão, compara o SHA-256 e só dá o nome final se a conferência passar:
+Rode este bloco inteiro numa chamada só. Ele baixa a extensão e o arquivo de conferência (`whatsapp-pessoal.mcpb.sha256`) da última versão publicada, compara o SHA-256 e só dá o nome final se a conferência passar:
 
 ```bash
 (
   cd ~/Downloads
   PARCIAL="whatsapp-pessoal.mcpb.baixando"
-  BASE="https://github.com/thaleslaray/whatsapp-claude/releases/download/v0.18.0"
+  BASE="https://github.com/thaleslaray/whatsapp-claude/releases/latest/download"
   if curl -fsSL "$BASE/whatsapp-pessoal.mcpb" -o "$PARCIAL" \
      && ESPERADO="$(curl -fsSL "$BASE/whatsapp-pessoal.mcpb.sha256" | awk '{print $1}')" \
      && [ -n "$ESPERADO" ] \
@@ -90,7 +90,7 @@ Depois, rode este bloco inteiro numa chamada só. Ele baixa o pacote da skill da
   set -e
   TMP="$(mktemp -d)"
   trap 'rm -rf "$TMP"' EXIT
-  curl -fsSL https://github.com/thaleslaray/whatsapp-claude/releases/download/v0.18.0/rotinas-whatsapp.skill -o "$TMP/rotinas-whatsapp.skill"
+  curl -fsSL https://github.com/thaleslaray/whatsapp-claude/releases/latest/download/rotinas-whatsapp.skill -o "$TMP/rotinas-whatsapp.skill"
   unzip -q "$TMP/rotinas-whatsapp.skill" -d "$TMP"
   mkdir -p ~/.claude/skills
   cp -R "$TMP/rotinas-whatsapp" ~/.claude/skills/rotinas-whatsapp

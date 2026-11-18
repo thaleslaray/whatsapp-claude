@@ -1,6 +1,6 @@
 {
   "name": "whatsapp-claude",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "private": true,
   "description": "Servidor MCP local e pessoal para o Claude ler o WhatsApp do dono (aparelho vinculado, não oficial): conversas individuais e grupos escolhidos",
   "type": "module",

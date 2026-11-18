@@ -5,7 +5,7 @@
 //   motor na varredura, a varredura) e devolve só as que formam um PAR com uma rajada do dono (pares.ts): `citada`
 //   (ligação forte) ou `sequencia` (fraca).
 // - Ao contrário dos exemplos de forma, a resposta do dono PODE ter número, link e valor: é para isso que serve. A
-//   pergunta é de terceiros (em `conteudo_de_terceiros`, com telefone mascarado). O LID nunca sai.
+//   pergunta é de terceiros (em `conteudo_de_terceiros`, como chegou, com telefone e tudo). O LID nunca sai.
 // - Rascunho da IA aceito sem edição (ou com edição mínima) não é o dono: fica fora, a não ser com
 //   `incluir_rascunhos_da_ia`, e aí vem marcado.
 // - Os pares não vão para arquivo: vêm do cache em memória do jeito (ids e datas), e o texto é lido na hora.
@@ -17,7 +17,6 @@ import { conversaPublica, dataIso, remetentePublico } from "../apresentacao.ts";
 import type { EntradaIndice, MensagemGuardada } from "../banco.ts";
 import type { Contexto } from "../contexto.ts";
 import { chaveDoTipo, TAMANHO_MAXIMO_DO_TIPO, termosParaParecidas, UM_DIA_MS } from "../jeito.ts";
-import { mascararNumero } from "../jid.ts";
 import { textosDaResposta, type Par } from "../pares.ts";
 import { caberNoTeto, registrarLeitura, respostaJson } from "../respostas.ts";
 import { FRASE_DO_DESLIGADO } from "./jeito.ts";
@@ -30,21 +29,9 @@ export const DIAS_PARA_CONFERIR = 60;
 /** Quantas recebidas parecidas a busca traz para procurar pares (a maioria não terá resposta do dono). */
 const CANDIDATAS = 300;
 
-/** Telefone dentro de um texto (8 a 15 dígitos, com ou sem separadores). */
-const TELEFONE = /\+?\d[\d\s().-]{6,}\d/gu;
-
-/** Troca todo telefone de um texto pela forma mascarada (+55 11 9****-1234, ou ****-1234 sem DDI conhecido). */
-export function mascararTelefones(texto: string): string {
-  return texto.replace(TELEFONE, (trecho) => {
-    const d = trecho.replace(/\D/gu, "");
-    if (d.length < 8 || d.length > 15) return trecho;
-    return d.startsWith("55") && (d.length === 12 || d.length === 13) ? mascararNumero(d) : `****-${d.slice(-4)}`;
-  });
-}
-
-/** O trecho da pergunta: telefone mascarado, até 300 caracteres. */
+/** O trecho da pergunta: o texto como chegou, até 300 caracteres. */
 function trechoDaPergunta(texto: string): string {
-  const t = [...mascararTelefones(texto.trim())];
+  const t = [...texto.trim()];
   return t.length > CARACTERES_DA_PERGUNTA ? `${t.slice(0, CARACTERES_DA_PERGUNTA).join("")}…` : t.join("");
 }
 

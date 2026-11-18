@@ -121,7 +121,7 @@ describe("wa_responder_lote: o cartão e o envio", () => {
     assert.equal(previa.texto, serializarLote([true, true], [["Chego às 8!", "E levo o bolo"], ["bora"]]));
     assert.ok(previa.texto_editavel);
     assert.equal(previa.lote.length, 2);
-    assert.match(previa.lote[0].alvo, /^\+55 11 9\*\*\*\*-5678 · c_/);
+    assert.match(previa.lote[0].alvo, /^\+55 11 91234-5678 · c_/);
     assert.match(previa.lote[1].destaque, /^GRUPO:/);
     assert.equal(previa.conteudo_de_terceiros.lote[0].nome, "Ana Paula");
     assert.equal(previa.conteudo_de_terceiros.lote[0].ultima.texto, "Que horas você chega?");

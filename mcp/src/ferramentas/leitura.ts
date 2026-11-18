@@ -16,7 +16,7 @@ import { CONVERSAS_NA_CONTAGEM } from "../busca.ts";
 import { novasDesde } from "../triagem.ts";
 import type { Contexto } from "../contexto.ts";
 import { datasDaAgenda } from "../agenda.ts";
-import { mascararNumero } from "../jid.ts";
+import { formatarNumero } from "../jid.ts";
 import { abertosDaConversa, COMPROMISSOS_NA_LEITURA, compromissoPublico, FRASE_DA_MEMORIA } from "./memoria.ts";
 import { declarouProntoParaHistorico } from "../registro-do-aparelho.ts";
 import { aparelhoDesktop } from "../config.ts";
@@ -70,7 +70,7 @@ export function registrarLeituras(server: McpServer, ctx: Contexto): void {
     {
       title: "Estado do WhatsApp",
       description:
-        "Diz se o WhatsApp está pareado e conectado, se esta sessão do Claude é a dona da conexão ou só leitora, o número (mascarado) e o nome do dono, " +
+        "Diz se o WhatsApp está pareado e conectado, se esta sessão do Claude é a dona da conexão ou só leitora, o número e o nome do dono, " +
         "quantas conversas e grupos estão guardados, a data da última mensagem recebida e a versão. " +
         "Em `celular`, a plataforma que o celular informou no pareamento (iphone, android, smba...) e se este processo declara o aparelho pronto para histórico sob demanda e como ele se registra, navegador ou desktop (os dois valem só para pareamento feito com ele). " +
         "Em `processo`, há quanto tempo este processo está no ar, o papel dele, quantas vezes o laço de eventos travou e a última queda de uma cópia desta extensão (sem conteúdo). " +
@@ -98,7 +98,7 @@ export function registrarLeituras(server: McpServer, ctx: Contexto): void {
         situacao,
         conectado: papel === "dono_da_conexao" && est?.situacao === "conectado",
         papel,
-        ...(dono ? { dono: { numero: mascararNumero(dono.numero), ...(dono.nome ? { nome: dono.nome } : {}) } } : {}),
+        ...(dono ? { dono: { numero: formatarNumero(dono.numero), ...(dono.nome ? { nome: dono.nome } : {}) } } : {}),
         // 0.7.5: `declarou_pronto_para_historico` diz se ESTE processo está com o embrulho do registro do aparelho
         // ativo (registro-do-aparelho.ts). NÃO diz se a sessão atual foi pareada com ele: o registro só vai no pareamento.
         // 0.7.6: `registro_como` diz como ESTE processo registra o aparelho num pareamento novo (navegador por padrão,
@@ -144,7 +144,7 @@ export function registrarLeituras(server: McpServer, ctx: Contexto): void {
     {
       title: "Listar conversas do WhatsApp",
       description:
-        "Lista as conversas guardadas (individuais e os grupos escolhidos), da mais recente para a mais antiga: id, nome, número mascarado, " +
+        "Lista as conversas guardadas (individuais e os grupos escolhidos), da mais recente para a mais antiga: id, nome, número, " +
         "se é grupo, a última mensagem (até 200 caracteres), quantas não lidas e, nas individuais em que a última mensagem não é do dono, " +
         "`esperando_resposta_desde` (a primeira mensagem sem resposta). Filtro opcional por nome e por `desde_horas` (só as com mensagem nas últimas N horas). Paginação com `cursor`. " +
         "Triagem sem IA: `ultima.tipo` (texto, figurinha, audio, nota_de_voz, imagem...); `encerramento_provavel: true` quando tudo o que a pessoa mandou depois da última mensagem do dono é fecho (figurinha, só emoji, \"valeu\", \"ok\", \"obrigado\", risada; até 5 mensagens): é só uma pista, não certeza, então confira antes de dar a conversa por encerrada; " +

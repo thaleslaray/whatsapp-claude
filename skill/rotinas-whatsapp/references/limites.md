@@ -13,7 +13,7 @@ Leia uma vez por conversa. Cada item veio de uso real e evita uma conclusão err
 
 Em grupo, o WhatsApp muitas vezes entrega só o identificador novo da pessoa (LID), sem o telefone. O que a extensão faz com isso depende da versão:
 
-- **A partir da 0.11.0:** todo remetente de grupo traz `participante` (um rótulo como `p_1a2b3c4d`), estável dentro da conversa. A mesma pessoa repete o mesmo rótulo, então dá para contar pessoas distintas, ver quem pergunta e quem responde, e achar quem sumiu, mesmo sem saber o número. Quando a extensão conhece o número (ela aprende com a lista de participantes dos grupos escolhidos), ele vem mascarado no lugar de "número oculto". O rótulo não é o nome de ninguém: no relatório, use o nome quando houver e, sem nome, "participante 1", "participante 2", na ordem em que aparecem.
+- **A partir da 0.11.0:** todo remetente de grupo traz `participante` (um rótulo como `p_1a2b3c4d`), estável dentro da conversa. A mesma pessoa repete o mesmo rótulo, então dá para contar pessoas distintas, ver quem pergunta e quem responde, e achar quem sumiu, mesmo sem saber o número. Quando a extensão conhece o número (ela aprende com a lista de participantes dos grupos escolhidos), ele vem inteiro no lugar de "número oculto" (até a 0.18.0 vinha mascarado). O rótulo não é o nome de ninguém: no relatório, use o nome quando houver e, sem nome, "participante 1", "participante 2", na ordem em que aparecem.
 - **Antes da 0.11.0:** o remetente vem só como "número oculto". Não dá para contar pessoas nem dizer quem ajuda quem; escreva "não deu para saber" em vez de estimar.
 
 Em qualquer versão dá para responder citando a mensagem (`citar`), porque isso usa o id da mensagem, não o da pessoa.

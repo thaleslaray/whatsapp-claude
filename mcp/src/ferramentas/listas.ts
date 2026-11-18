@@ -14,7 +14,7 @@ import { nomeCasaComFiltro, normalizarTexto, PRIORIDADE, VALIDADE_DO_CACHE_DE_GR
 import { dataIso, nomeDeTerceiros } from "../apresentacao.ts";
 import type { Previa } from "../confirmacao.ts";
 import type { Contexto } from "../contexto.ts";
-import { ehGrupo, ehIndividual, ehLid, jidDoNumero, mascararNumero, normalizar, numeroDe } from "../jid.ts";
+import { ehGrupo, ehIndividual, ehLid, jidDoNumero, formatarNumero, normalizar, numeroDe } from "../jid.ts";
 import { caberNoTeto, registrarEscrita, registrarEscritaDireta, registrarLeitura, respostaJson } from "../respostas.ts";
 import { limparProfundo } from "../segredos.ts";
 
@@ -74,7 +74,7 @@ function resolverPessoa(banco: Banco, ref: string): Resolvido {
 function pessoaPublica(banco: Banco, jid: string): Record<string, unknown> {
   const nome = banco.nomeConhecido(jid);
   const numero = numeroDe(jid) ?? numeroDe(banco.numeroDoLid(jid));
-  return { id: banco.idPublico(jid), numero: numero ? mascararNumero(numero) : "número oculto", ...nomeDeTerceiros(nome) };
+  return { id: banco.idPublico(jid), numero: numero ? formatarNumero(numero) : "número oculto", ...nomeDeTerceiros(nome) };
 }
 
 /**

@@ -51,7 +51,7 @@ export function registrarContatos(server: McpServer, ctx: Contexto): void {
         : r.erro
           ? `O celular respondeu com erro (${r.erro}): ${r.contatos_recebidos} contato(s) chegaram. Tente de novo mais tarde (há um freio de 10 min).`
           : `A agenda chegou: ${r.contatos_recebidos} contato(s), ${r.nomes_novos} nome(s) novo(s), ${r.nomes_atualizados} atualizado(s); ${ganharam} conversa(s) guardada(s) ganharam nome.`;
-      const semNome = semNomeDepois > 0 ? ` ${semNomeDepois} conversa(s) individuais continuam sem nome: chame-as só pelo número mascarado, ou pergunte ao dono quem é.` : "";
+      const semNome = semNomeDepois > 0 ? ` ${semNomeDepois} conversa(s) individuais continuam sem nome: chame-as só pelo número, ou pergunte ao dono quem é.` : "";
       return respostaJson({
         ...contagens,
         terminou: r.terminou,
