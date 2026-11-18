@@ -206,7 +206,81 @@ export function nomeSeguro(nome: string | undefined, mimetype: string | undefine
 
 // ---- envio de arquivo ----
 
-export type TipoDeEnvio = "imagem" | "video" | "audio" | "nota_de_voz" | "documento";
+export type TipoDeEnvio = "imagem" | "video" | "audio" | "nota_de_voz" | "documento" | "figurinha";
+
+/** 0.18.0: os requisitos da figurinha (os do próprio WhatsApp): WebP de exatamente 512x512, parada até 100 KB, animada até 500 KB. */
+export const FIGURINHA_LADO = 512;
+export const FIGURINHA_PARADA_MAXIMA_BYTES = 100 * 1024;
+export const FIGURINHA_ANIMADA_MAXIMA_BYTES = 500 * 1024;
+
+/**
+ * 0.18.0: lê o contêiner RIFF/WebP (sem decodificar a imagem e sem dependência): largura, altura e se é animada.
+ * Formatos: `VP8 ` (com perda: quadro-chave, código 9d 01 2a, 14 bits de largura e altura), `VP8L` (sem perda:
+ * assinatura 0x2f, 14 bits de largura-1 e altura-1) e `VP8X` (estendido: bandeira de animação 0x02 e a tela em 24 bits
+ * de largura-1 e altura-1). Animada = VP8X com a bandeira, um `ANIM` e ao menos um `ANMF`. Qualquer incoerência
+ * (cortado, tamanho do RIFF maior que o arquivo, bandeira sem quadros ou quadros sem bandeira, VP8X parado sem imagem)
+ * devolve undefined: não é um WebP em que se possa confiar.
+ */
+export function lerWebp(b: Buffer): { largura: number; altura: number; animada: boolean } | undefined {
+  if (b.length < 20 || !ehWebp(b)) return undefined;
+  const fim = 8 + b.readUInt32LE(4);
+  if (fim > b.length || fim < 20) return undefined;
+  const pedacos = new Map<string, Buffer>();
+  const vistos = new Set<string>();
+  let primeiro: string | undefined;
+  for (let i = 12; i + 8 <= fim; ) {
+    const fourcc = b.toString("latin1", i, i + 4);
+    const tamanho = b.readUInt32LE(i + 4);
+    const inicio = i + 8;
+    if (inicio + tamanho > fim) return undefined;
+    primeiro ??= fourcc;
+    vistos.add(fourcc);
+    if (!pedacos.has(fourcc)) pedacos.set(fourcc, b.subarray(inicio, inicio + tamanho));
+    i = inicio + tamanho + (tamanho % 2);
+  }
+  const lerVp8 = (c: Buffer | undefined) => {
+    if (!c || c.length < 10 || (c[0]! & 1) !== 0 || c[3] !== 0x9d || c[4] !== 0x01 || c[5] !== 0x2a) return undefined;
+    return { largura: c.readUInt16LE(6) & 0x3fff, altura: c.readUInt16LE(8) & 0x3fff };
+  };
+  const lerVp8l = (c: Buffer | undefined) => {
+    if (!c || c.length < 5 || c[0] !== 0x2f) return undefined;
+    const bits = c.readUInt32LE(1);
+    return { largura: (bits & 0x3fff) + 1, altura: ((bits >>> 14) & 0x3fff) + 1 };
+  };
+  if (primeiro === "VP8X") {
+    const x = pedacos.get("VP8X")!;
+    if (x.length < 10) return undefined;
+    const animada = (x[0]! & 0x02) !== 0;
+    const largura = x.readUIntLE(4, 3) + 1;
+    const altura = x.readUIntLE(7, 3) + 1;
+    const temQuadros = vistos.has("ANMF");
+    if (animada !== temQuadros) return undefined;
+    if (animada && !vistos.has("ANIM")) return undefined;
+    if (!animada && !lerVp8(pedacos.get("VP8 ")) && !lerVp8l(pedacos.get("VP8L"))) return undefined;
+    return { largura, altura, animada };
+  }
+  const simples = primeiro === "VP8 " ? lerVp8(pedacos.get("VP8 ")) : primeiro === "VP8L" ? lerVp8l(pedacos.get("VP8L")) : undefined;
+  return simples ? { ...simples, animada: false } : undefined;
+}
+
+/**
+ * 0.18.0: confere o arquivo inteiro de uma figurinha antes do cartão: WebP de verdade, exatamente 512x512, parada até
+ * 100 KB, animada até 500 KB. Cada recusa diz o que está errado e o valor encontrado, terminando em "Nada foi preparado.".
+ */
+export function validarFigurinha(conteudo: Buffer): { animada: boolean; largura: number; altura: number } {
+  const info = lerWebp(conteudo);
+  if (!info) throw new Error("Figurinha só com arquivo WebP de verdade, e o conteúdo deste não é um WebP válido (ou está cortado). Nada foi preparado.");
+  if (info.largura !== FIGURINHA_LADO || info.altura !== FIGURINHA_LADO) {
+    throw new Error(`Figurinha tem de ter exatamente ${FIGURINHA_LADO}x${FIGURINHA_LADO} pixels; esta tem ${info.largura}x${info.altura}. Nada foi preparado.`);
+  }
+  const teto = info.animada ? FIGURINHA_ANIMADA_MAXIMA_BYTES : FIGURINHA_PARADA_MAXIMA_BYTES;
+  if (conteudo.length > teto) {
+    throw new Error(
+      `Figurinha ${info.animada ? "animada" : "parada"} pode ter até ${teto / 1024} KB; esta tem ${tamanhoLegivel(conteudo.length)} (${conteudo.length} bytes). Nada foi preparado.`,
+    );
+  }
+  return { animada: info.animada, largura: info.largura, altura: info.altura };
+}
 
 const MIME_POR_EXTENSAO: Record<string, string> = Object.fromEntries(
   Object.entries(EXTENSOES).flatMap(([mime, exts]) => exts.map((e) => [e, mime] as const)).reverse(),
@@ -233,10 +307,22 @@ const ehWav = (b: Buffer) => comeca(b, "RIFF") && comeca(b, "WAVE", 8);
 /**
  * Como o arquivo vai: pelo conteúdo (os primeiros bytes) E pela extensão. Imagem só jpg, png e webp de verdade; vídeo
  * só mp4; áudio só ogg, mp3, m4a e wav; o resto (ou tudo, com `como_documento`) vai como documento. `voz` só com
- * OGG/Opus. O mimetype do documento sai da extensão.
+ * OGG/Opus. O mimetype do documento sai da extensão. 0.18.0: `figurinha` só com arquivo .webp que é WebP de verdade
+ * (o resto da conferência, tamanho e dimensões, é do `validarFigurinha`, com o arquivo inteiro); sem ela, o .webp
+ * continua indo como imagem.
  */
-export function tipoParaEnviar(caminho: string, cabeca: Buffer, opcoes: { como_documento?: boolean; voz?: boolean }): { tipo: TipoDeEnvio; mimetype: string } {
+export function tipoParaEnviar(
+  caminho: string,
+  cabeca: Buffer,
+  opcoes: { como_documento?: boolean; voz?: boolean; figurinha?: boolean },
+): { tipo: TipoDeEnvio; mimetype: string } {
   const ext = extensaoDe(caminho);
+  if (opcoes.figurinha) {
+    if (opcoes.voz) throw new Error("Figurinha não vai como mensagem de voz: use `figurinha` ou `voz`, não os dois. Nada foi preparado.");
+    if (opcoes.como_documento) throw new Error("Figurinha não vai como documento: use `figurinha` ou `como_documento`, não os dois. Nada foi preparado.");
+    if (ext !== "webp" || !ehWebp(cabeca)) throw new Error("Figurinha só com arquivo WebP (.webp) de verdade; este não é. Nada foi preparado.");
+    return { tipo: "figurinha", mimetype: "image/webp" };
+  }
   if (opcoes.voz) {
     if (!ehOpus(cabeca)) throw new Error("Mensagem de voz só com arquivo OGG/Opus (como as do próprio WhatsApp). Envie sem `voz`, como áudio ou documento. Nada foi preparado.");
     return { tipo: "nota_de_voz", mimetype: "audio/ogg; codecs=opus" };

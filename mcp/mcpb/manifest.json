@@ -3,9 +3,9 @@
   "name": "whatsapp-pessoal",
   "display_name": "WhatsApp pessoal",
   "icon": "icon.png",
-  "version": "0.17.1",
+  "version": "0.18.0",
   "description": "Cliente não oficial, para uso pessoal: o Claude lê as suas conversas e os grupos que você escolher no WhatsApp, e só escreve depois do seu clique.",
-  "long_description": "Projeto pessoal, sem relação com o WhatsApp ou a Meta. Conecta como aparelho vinculado (biblioteca Baileys), o que viola os termos do WhatsApp e pode levar a restrição ou banimento do número; começar conversa com quem não tem o seu número é o que mais leva a banimento. Depois de instalar, peça ao Claude \"parear o WhatsApp\" e leia o QR que aparece na conversa. Lê as conversas individuais (menos as da lista \"nunca ler\") e só os grupos que você escolher; pede ao celular mensagens mais antigas quando você quiser. Abre fotos, áudios, vídeos e documentos recebidos quando você pedir: eles ficam em Downloads/WhatsApp Claude, sem cifra. Transcreve áudios neste computador quando você pedir (o modelo de transcrição, 190 MB, é baixado uma vez, depois do seu clique). Responde conversas e grupos escolhidos, envia arquivos deste computador, começa conversa com um número novo, edita (até 15 min) e apaga para todos (até 48 h) as suas mensagens: tudo isso só depois do seu clique no cartão, com o envio ligado e até o limite do dia. Reagir com emoji é direto, com teto diário. Nunca marca como lida, nunca aparece online e não manda prévia de link. A conexão só fica ligada com o Claude Desktop aberto; tudo é guardado cifrado neste computador, com a chave no cofre do sistema. Funciona no Mac e no Windows.",
+  "long_description": "Projeto pessoal, sem relação com o WhatsApp ou a Meta. Conecta como aparelho vinculado (biblioteca Baileys), o que viola os termos do WhatsApp e pode levar a restrição ou banimento do número; começar conversa com quem não tem o seu número é o que mais leva a banimento. Depois de instalar, peça ao Claude \"parear o WhatsApp\" e leia o QR que aparece na conversa. Lê as conversas individuais (menos as da lista \"nunca ler\") e só os grupos que você escolher; pede ao celular mensagens mais antigas quando você quiser. Abre fotos, áudios, vídeos e documentos recebidos quando você pedir: eles ficam em Downloads/WhatsApp Claude, sem cifra. Transcreve áudios neste computador quando você pedir (o modelo de transcrição, 190 MB, é baixado uma vez, depois do seu clique). Responde conversas e grupos escolhidos, envia arquivos e figurinhas deste computador, começa conversa com um número novo, edita (até 15 min) e apaga para todos (até 48 h) as suas mensagens: tudo isso só depois do seu clique no cartão, com o envio ligado e até o limite do dia. Reagir com emoji é direto, com teto diário. Nunca marca como lida, nunca aparece online e não manda prévia de link. A conexão só fica ligada com o Claude Desktop aberto; tudo é guardado cifrado neste computador, com a chave no cofre do sistema. Funciona no Mac e no Windows.",
   "author": {
     "name": "Thales Laray",
     "url": "https://thaleslaray.com.br"
@@ -170,7 +170,7 @@
     },
     {
       "name": "wa_enviar_arquivo",
-      "description": "Envia um arquivo deste computador (com clique no cartão)"
+      "description": "Envia um arquivo ou uma figurinha (WebP 512x512) deste computador (com clique no cartão)"
     },
     {
       "name": "wa_iniciar_conversa",

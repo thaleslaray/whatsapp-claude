@@ -83,7 +83,7 @@ Depois de instalado, é só conversar com o Claude do seu jeito. Não precisa sa
 |---|---|---|
 | "Responde a Ana que eu chego às 15h" | Prévia com o texto, que dá para editar. Em grupo, o cartão mostra quantas pessoas vão receber | Sim |
 | "Responde o Leonardo, minha mãe e a Jhenifer de uma vez" | Um cartão só com várias conversas: dá para editar cada mensagem e desmarcar quem não deve receber. Um clique em "Enviar todas" | Sim |
-| "Manda este PDF para o Beto" | Envia foto, vídeo, áudio, mensagem de voz (OGG/Opus) ou documento do computador, com legenda editável | Sim |
+| "Manda este PDF para o Beto" | Envia foto, vídeo, áudio, mensagem de voz (OGG/Opus), figurinha (WebP de 512x512, até 100 KB parada ou 500 KB animada, sem legenda) ou documento do computador, com legenda editável | Sim |
 | "Começa uma conversa com +55 11 91234-5678" | Primeira mensagem para um número novo. O cartão mostra o número inteiro. Conta no limite do dia e no teto de conversas novas | Sim |
 | "Corrige aquela mensagem" | Edita uma mensagem de texto sua, até 15 min depois | Sim |
 | "Apaga aquela mensagem para todos" | Apaga para todos uma mensagem sua, até 48 h depois. Não tem volta | Sim |

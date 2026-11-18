@@ -22,6 +22,9 @@ import {
   ABERTURAS_POR_DIA,
   ENVIO_DOCUMENTO_MAXIMO_BYTES,
   ENVIO_MIDIA_MAXIMO_BYTES,
+  FIGURINHA_ANIMADA_MAXIMA_BYTES,
+  FIGURINHA_LADO,
+  FIGURINHA_PARADA_MAXIMA_BYTES,
   IMAGEM_EM_LINHA_MAXIMA_BYTES,
   IMAGEM_EM_LINHA_TIPOS,
   MAXIMO_DE_MIDIA_BYTES,
@@ -34,6 +37,7 @@ import {
   tipoDaBaileys,
   tipoParaEnviar,
   caminhoProibido,
+  validarFigurinha,
   type TipoDeEnvio,
 } from "../midia.ts";
 import { gerarMiniatura } from "../miniatura.ts";
@@ -145,9 +149,18 @@ interface CorpoArquivo {
   mimetype: string;
   nome: string;
   legenda: string;
+  /** 0.18.0: só na figurinha (conferida pelo contêiner WebP antes do cartão). */
+  animada?: boolean;
 }
 
-const ROTULO_DO_TIPO: Record<TipoDeEnvio, string> = { imagem: "imagem", video: "vídeo", audio: "áudio", nota_de_voz: "mensagem de voz", documento: "documento" };
+const ROTULO_DO_TIPO: Record<TipoDeEnvio, string> = {
+  imagem: "imagem",
+  video: "vídeo",
+  audio: "áudio",
+  nota_de_voz: "mensagem de voz",
+  documento: "documento",
+  figurinha: "figurinha",
+};
 
 function lerCabeca(caminho: string): Buffer {
   const fd = openSync(caminho, "r");
@@ -258,6 +271,7 @@ export function registrarMidia(server: McpServer, ctx: Contexto): void {
         "Prepara o envio de um arquivo DESTE computador (caminho completo) para uma conversa que já existe ou um grupo ESCOLHIDO e mostra a prévia num cartão, " +
         "com para quem, o nome, o tipo, o tamanho e o caminho real do arquivo; a legenda (opcional) o dono pode editar. Envia SÓ depois do clique. " +
         "Foto (jpg, png, webp), vídeo (mp4) e áudio vão como tal; o resto vai como documento (ou tudo, com `como_documento`). `voz: true` manda um OGG/Opus como mensagem de voz. " +
+        `\`figurinha: true\` manda um WebP como figurinha (sem legenda, nem com \`voz\` ou \`como_documento\`): exatamente ${FIGURINHA_LADO}x${FIGURINHA_LADO}, até ${FIGURINHA_PARADA_MAXIMA_BYTES / 1024} KB parada ou ${FIGURINHA_ANIMADA_MAXIMA_BYTES / 1024} KB animada; sem ela, o .webp vai como foto. ` +
         `Tetos: ${ENVIO_MIDIA_MAXIMO_BYTES / (1024 * 1024)} MB para foto, vídeo e áudio; ${ENVIO_DOCUMENTO_MAXIMO_BYTES / (1024 * 1024)} MB para documento. Conta no limite de respostas do dia. ` +
         "Só envia arquivo que está nas pastas Documentos, Mesa (Desktop), Downloads, Imagens, Filmes/Vídeos e Músicas do dono (ou nas subpastas delas), pelo caminho real; " +
         "fora delas recusa (o dono pode copiar o arquivo para uma delas). Dentro delas, recusa pasta oculta, .env, chaves privadas, certificados, credenciais e arquivos de navegador (cookies, senhas). " +
@@ -267,12 +281,16 @@ export function registrarMidia(server: McpServer, ctx: Contexto): void {
       inputSchema: z.strictObject({
         conversa: z.string().trim().min(1).max(200).describe("id (c_... ou g_...), nome único ou número da conversa"),
         arquivo: z.string().trim().min(1).max(4096).describe("Caminho completo do arquivo neste computador"),
-        legenda: z.string().max(20_000).optional().describe(`Legenda (opcional, até ${LIMITE_DO_TEXTO} caracteres; não vale na mensagem de voz)`),
+        legenda: z.string().max(20_000).optional().describe(`Legenda (opcional, até ${LIMITE_DO_TEXTO} caracteres; não vale na mensagem de voz nem na figurinha)`),
         como_documento: z.boolean().default(false).describe("Manda como documento mesmo sendo foto, vídeo ou áudio"),
         voz: z.boolean().default(false).describe("Manda um OGG/Opus como mensagem de voz"),
+        figurinha: z
+          .boolean()
+          .default(false)
+          .describe(`Manda um WebP como figurinha (${FIGURINHA_LADO}x${FIGURINHA_LADO}, até ${FIGURINHA_PARADA_MAXIMA_BYTES / 1024} KB parada ou ${FIGURINHA_ANIMADA_MAXIMA_BYTES / 1024} KB animada; sem legenda)`),
       }),
     },
-    async ({ conversa, arquivo, legenda, como_documento, voz }, _chamada, escrever) => {
+    async ({ conversa, arquivo, legenda, como_documento, voz, figurinha }, _chamada, escrever) => {
       const { banco } = await ctx.nucleo();
       if (!banco.envioLigado()) throw new Error(ENVIO_DESLIGADO);
       // 0.11.0: grupo escolhido sem mensagem guardada ainda também recebe arquivo (como no wa_responder).
@@ -297,13 +315,24 @@ export function registrarMidia(server: McpServer, ctx: Contexto): void {
       if (proibido) throw new Error(`${proibido} Nada foi preparado.`);
       if (st.size === 0) throw new Error("O arquivo está vazio. Nada foi preparado.");
       if (voz && legenda) throw new Error("Mensagem de voz não leva legenda. Nada foi preparado.");
-      const { tipo, mimetype } = tipoParaEnviar(real, lerCabeca(real), { como_documento, voz });
+      // 0.18.0: figurinha não leva legenda. Recusa em vez de descartar em silêncio (o dono veria uma legenda que não sai).
+      if (figurinha && legenda !== undefined && legenda.trim() !== "") {
+        throw new Error("Figurinha não leva legenda. Mande sem `legenda` (se quiser escrever algo, mande depois com wa_responder). Nada foi preparado.");
+      }
+      const { tipo, mimetype } = tipoParaEnviar(real, lerCabeca(real), { como_documento, voz, figurinha });
+      // 0.18.0: a figurinha é conferida inteira antes do cartão (contêiner WebP, 512x512, 100/500 KB). Acima do maior teto
+      // nem lê o arquivo todo.
+      if (tipo === "figurinha" && st.size > FIGURINHA_ANIMADA_MAXIMA_BYTES) {
+        throw new Error(`Figurinha (parada até ${FIGURINHA_PARADA_MAXIMA_BYTES / 1024} KB, animada até ${FIGURINHA_ANIMADA_MAXIMA_BYTES / 1024} KB) passa do teto: esta tem ${tamanhoLegivel(st.size)} (${st.size} bytes). Nada foi preparado.`);
+      }
       const teto = tipo === "documento" ? ENVIO_DOCUMENTO_MAXIMO_BYTES : ENVIO_MIDIA_MAXIMO_BYTES;
       if (st.size > teto) {
         throw new Error(`O arquivo tem ${tamanhoLegivel(st.size)}; o teto para ${ROTULO_DO_TIPO[tipo]} é ${teto / (1024 * 1024)} MB.${tipo !== "documento" ? " Tente com `como_documento` (até 100 MB)." : ""} Nada foi preparado.`);
       }
       if (legenda !== undefined && [...legenda].length > LIMITE_DO_TEXTO) throw new Error(`A legenda passa de ${LIMITE_DO_TEXTO} caracteres. Nada foi preparado.`);
       const conteudo = readFileSync(real);
+      const animada = tipo === "figurinha" ? validarFigurinha(conteudo).animada : undefined;
+      const rotulo = tipo === "figurinha" && animada ? "figurinha animada" : ROTULO_DO_TIPO[tipo];
       const t = ctx.exigirDono();
       if (t.estado().situacao !== "conectado") throw new Error("O WhatsApp não está conectado agora (veja wa_estado). Nada foi preparado.");
       const limite = ctx.config.limiteDiario;
@@ -322,14 +351,15 @@ export function registrarMidia(server: McpServer, ctx: Contexto): void {
           : {}),
         arquivo: {
           nome,
-          tipo: `${ROTULO_DO_TIPO[tipo]} (${mimetype})`,
+          tipo: tipo === "figurinha" ? `${rotulo} (${mimetype}, ${FIGURINHA_LADO}x${FIGURINHA_LADO})` : `${rotulo} (${mimetype})`,
           tamanho: `${tamanhoLegivel(st.size)} (${st.size} bytes)`,
           caminho: real,
           // A própria foto, para o dono ver no cartão (quem desenha é o navegador do cartão; aqui nada é decodificado
           // antes do clique). Só foto pequena: a prévia passa pelo canal entre sessões (2 MB).
-          ...(tipo === "imagem" && conteudo.length <= IMAGEM_EM_LINHA_MAXIMA_BYTES ? { imagem: `data:${mimetype};base64,${conteudo.toString("base64")}` } : {}),
+          ...((tipo === "imagem" || tipo === "figurinha") && conteudo.length <= IMAGEM_EM_LINHA_MAXIMA_BYTES ? { imagem: `data:${mimetype};base64,${conteudo.toString("base64")}` } : {}),
         },
-        ...(tipo === "nota_de_voz" ? {} : { texto: legenda ?? "" }),
+        // Mensagem de voz e figurinha não levam legenda: o cartão não mostra campo de texto.
+        ...(tipo === "nota_de_voz" || tipo === "figurinha" ? {} : { texto: legenda ?? "" }),
         ...(e.nome ?? nomeDoGrupo ? { conteudo_de_terceiros: { nome: (e.nome ?? nomeDoGrupo)! } } : {}),
         detalhes: [
           ...(resolve(arquivo) !== real ? [`Aviso: o caminho pedido (${arquivo}) é um atalho; o arquivo que sai é o do caminho real acima.`] : []),
@@ -339,11 +369,25 @@ export function registrarMidia(server: McpServer, ctx: Contexto): void {
             ? "A miniatura da foto é feita depois do seu clique (JPEG e PNG); se não der, a foto sai sem miniatura."
             : tipo === "video"
               ? "Vídeo vai sem miniatura (quem recebe vê o vídeo ao abrir)."
-              : "Antes de enviar, o WhatsApp mostra “digitando…” por 1 a 3 s. Você não aparece online.",
+              : tipo === "figurinha"
+                ? "Figurinha vai sem legenda e sem miniatura (quem recebe vê a própria figurinha). Antes de enviar, o WhatsApp mostra “digitando…” por 1 a 3 s."
+                : "Antes de enviar, o WhatsApp mostra “digitando…” por 1 a 3 s. Você não aparece online.",
         ],
         botao: "Enviar",
       };
-      const corpo: CorpoArquivo = { jid: e.jid, caminho: real, tamanho: st.size, mtimeMs: st.mtimeMs, sha256: sha256(conteudo), tipo, mimetype, nome, legenda: legenda ?? "" };
+      const corpo: CorpoArquivo = {
+        jid: e.jid,
+        caminho: real,
+        tamanho: st.size,
+        mtimeMs: st.mtimeMs,
+        sha256: sha256(conteudo),
+        tipo,
+        mimetype,
+        nome,
+        // Figurinha: a legenda é sempre vazia (a que veio só com espaços não vai).
+        legenda: tipo === "figurinha" ? "" : (legenda ?? ""),
+        ...(animada !== undefined ? { animada } : {}),
+      };
       return escrever(
         "wa_enviar_arquivo",
         corpo,
@@ -371,9 +415,18 @@ export function registrarMidia(server: McpServer, ctx: Contexto): void {
           const contadas = banco.reservarEnvio(ctx.agora(), limite);
           // 0.12.0: a legenda proposta pela IA (não vazia) contra a enviada. Legenda que só o dono escreveu (a proposta
           // era vazia) é dele: sem marca e sem par.
-          const proposta = legenda ?? "";
+          const proposta = c.tipo === "figurinha" ? "" : (legenda ?? "");
           const marca = proposta !== "" ? marcaDoRascunho(proposta, c.legenda) : undefined;
-          const r = await tr.enviarArquivo(c.jid, { tipo: c.tipo, mimetype: c.mimetype, conteudo: agora, nome: c.nome, ...(c.legenda ? { legenda: c.legenda } : {}), ...(miniatura ? { miniatura } : {}), ...(marca ? { rascunho: marca } : {}) });
+          const r = await tr.enviarArquivo(c.jid, {
+            tipo: c.tipo,
+            mimetype: c.mimetype,
+            conteudo: agora,
+            nome: c.nome,
+            ...(c.legenda ? { legenda: c.legenda } : {}),
+            ...(miniatura ? { miniatura } : {}),
+            ...(marca ? { rascunho: marca } : {}),
+            ...(c.tipo === "figurinha" ? { animada: c.animada === true } : {}),
+          });
           if (proposta !== "") aprenderComOEnvio(banco, { conversa: c.jid, mensagem_id: r.id, ferramenta: "wa_enviar_arquivo", rascunho: proposta, enviado: c.legenda, em: r.ts });
           const semMiniatura = mini && "erro" in mini ? ` Foi sem miniatura (${mini.erro}).` : "";
           return {
@@ -383,10 +436,10 @@ export function registrarMidia(server: McpServer, ctx: Contexto): void {
             enviada_em: dataIso(r.ts),
             respostas_hoje: contadas,
             limite_diario: limite,
-            frase: `Arquivo enviado na conversa ${idPublico}.${semMiniatura} Respostas hoje: ${contadas} de ${limite}.`,
+            frase: `${c.tipo === "figurinha" ? "Figurinha enviada" : "Arquivo enviado"} na conversa ${idPublico}.${semMiniatura} Respostas hoje: ${contadas} de ${limite}.`,
           };
         },
-        tipo === "nota_de_voz"
+        tipo === "nota_de_voz" || tipo === "figurinha"
           ? undefined
           : {
               limite: LIMITE_DO_TEXTO,
@@ -398,7 +451,7 @@ export function registrarMidia(server: McpServer, ctx: Contexto): void {
               },
             },
         // Registro sem o caminho nem o nome do arquivo: só o tipo e o tamanho.
-        { registro: { conversa: idPublico, alvo: idPublico, tipo_de_arquivo: tipo, bytes: st.size }, ...(legenda ? { aoDesistir: contarDesistencia(banco) } : {}) },
+        { registro: { conversa: idPublico, alvo: idPublico, tipo_de_arquivo: tipo, bytes: st.size }, ...(legenda && tipo !== "figurinha" ? { aoDesistir: contarDesistencia(banco) } : {}) },
       );
     },
   );

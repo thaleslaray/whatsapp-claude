@@ -32,7 +32,7 @@ import { alteracaoDaMensagem, autorDaMensagem, converterMensagem, dataDaMensagem
 import { ehGrupo, ehIndividual, ehLid, ehSempreIgnorado, mascararNumero, normalizar, numeroDe } from "./jid.ts";
 import type { MarcaDoRascunho } from "./jeito.ts";
 import { log } from "./log.ts";
-import { baixarCifrado, decifrarMidia, enderecoParaBaixar, ErroDeMidia, ESPERA_DO_REENVIO_MS, MAXIMO_DE_MIDIA_BYTES, tipoDaBaileys, type TipoDeEnvio } from "./midia.ts";
+import { baixarCifrado, decifrarMidia, enderecoParaBaixar, ErroDeMidia, ESPERA_DO_REENVIO_MS, FIGURINHA_LADO, MAXIMO_DE_MIDIA_BYTES, tipoDaBaileys, type TipoDeEnvio } from "./midia.ts";
 import { declararProntoParaHistoricoSobDemanda } from "./registro-do-aparelho.ts";
 import { aparelhoDesktop } from "./config.ts";
 import { registrar as registrarSegredo } from "./segredos.ts";
@@ -166,6 +166,8 @@ export interface ArquivoParaEnviar {
   miniatura?: { jpegThumbnail: string; width: number; height: number };
   /** 0.12.0: a legenda veio de um rascunho da IA: a mensagem guardada leva a marca (ver MensagemGuardada.rascunho_da_ia). */
   rascunho?: MarcaDoRascunho;
+  /** 0.18.0: figurinha animada (o contêiner WebP já foi conferido por quem chama: 512x512, VP8X com ANIM/ANMF). */
+  animada?: boolean;
 }
 
 /** 0.12.0: o texto veio de um rascunho da IA (cartão): a mensagem guardada leva a marca. */
@@ -1981,6 +1983,9 @@ export function criarTransporte(opcoes: OpcoesTransporte): Transporte {
       // Foto: a miniatura vem pronta (miniatura.ts); sem ela, vazia, para a Baileys não tentar a dela (que não funciona com
       // o jimp 1.x). No vídeo a Baileys rodaria o `ffmpeg` do computador por linha de comando: a miniatura vazia evita isso
       // (vídeo sem miniatura é aceito pelo WhatsApp).
+      // 0.18.0: figurinha. Na Baileys rc14 (`prepareWAMessageMedia`, lib/Utils/messages.js:134-137) só imagem e vídeo
+      // calculam miniatura e só áudio calcula duração e forma de onda: o sticker é só cifrado e enviado (nada de sharp,
+      // jimp nem ffmpeg). Largura e altura vão fixas (512, já conferidas), e o isAnimated vem da leitura do contêiner.
       const conteudo =
         arquivo.tipo === "imagem"
           ? {
@@ -1990,13 +1995,15 @@ export function criarTransporte(opcoes: OpcoesTransporte): Transporte {
               ...(arquivo.miniatura ? { width: arquivo.miniatura.width, height: arquivo.miniatura.height } : {}),
               ...legenda,
             }
-          : arquivo.tipo === "video"
-            ? { video: arquivo.conteudo, mimetype: arquivo.mimetype, jpegThumbnail: "", ...legenda }
-            : arquivo.tipo === "nota_de_voz"
-              ? { audio: arquivo.conteudo, mimetype: "audio/ogg; codecs=opus", ptt: true }
-              : arquivo.tipo === "audio"
-                ? { audio: arquivo.conteudo, mimetype: arquivo.mimetype }
-                : { document: arquivo.conteudo, mimetype: arquivo.mimetype, fileName: arquivo.nome, ...legenda };
+          : arquivo.tipo === "figurinha"
+            ? { sticker: arquivo.conteudo, mimetype: "image/webp", isAnimated: arquivo.animada === true, width: FIGURINHA_LADO, height: FIGURINHA_LADO }
+            : arquivo.tipo === "video"
+              ? { video: arquivo.conteudo, mimetype: arquivo.mimetype, jpegThumbnail: "", ...legenda }
+              : arquivo.tipo === "nota_de_voz"
+                ? { audio: arquivo.conteudo, mimetype: "audio/ogg; codecs=opus", ptt: true }
+                : arquivo.tipo === "audio"
+                  ? { audio: arquivo.conteudo, mimetype: arquivo.mimetype }
+                  : { document: arquivo.conteudo, mimetype: arquivo.mimetype, fileName: arquivo.nome, ...legenda };
       const r = await atual.sendMessage(jid, conteudo, { messageId: id });
       const devolvido = r?.key?.id ?? undefined;
       if (r?.message) {

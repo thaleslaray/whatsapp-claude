@@ -43,7 +43,7 @@ const CAPACIDADE_DE_TELA = { extensions: { "io.modelcontextprotocol/ui": { mimeT
 const DO_MODELO = [
   "wa_abrir_midia", "wa_anotar", "wa_apagar", "wa_aprender", "wa_atualizar_contatos", "wa_bloquear_conversas", "wa_buscar", "wa_buscar_historico", "wa_cancelar", "wa_como_eu_respondi", "wa_conferir_rascunho", "wa_confirmar", "wa_desconectar", "wa_editar",
   "wa_edicoes_dos_rascunhos", "wa_enviar_arquivo", "wa_envio", "wa_escolher_grupos", "wa_esquecer", "wa_estado", "wa_exemplos_do_meu_jeito", "wa_iniciar_conversa", "wa_ler_conversa", "wa_listar_conversas", "wa_listar_grupos",
-  "wa_marcar_resumo", "wa_memoria", "wa_meu_jeito", "wa_parear", "wa_qr", "wa_reagir", "wa_responder", "wa_transcrever",
+  "wa_marcar_resumo", "wa_memoria", "wa_meu_jeito", "wa_parear", "wa_qr", "wa_reagir", "wa_responder", "wa_responder_lote", "wa_transcrever",
 ];
 const NATIVOS = ["darwin-arm64", "darwin-x64", "win32-arm64", "win32-x64"];
 const NATIVO_DAQUI = `${process.platform}-${process.arch}`;
